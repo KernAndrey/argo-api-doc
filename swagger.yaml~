@@ -13,24 +13,24 @@ info:
 host: ""
 basePath: "/v2"
 tags:
-  - name: "tasks"
-    description: "Endpoints for project tasks"
-  - name: "notes"
-    description: "Access to Petstore orders"
+- name: "tasks"
+  description: "Endpoints for project tasks"
+- name: "notes"
+  description: "Access to Petstore orders"
 schemes:
-  - "https"
-  - "http"
+- "https"
+- "http"
 paths:
   /api/v1/tasks/:
     get:
       tags:
-        - "tasks"
+      - "tasks"
       summary: "Returns all active tasks  where user is estimator or technician"
       description: ""
       consumes:
-        - "application/json"
+      - "application/json"
       produces:
-        - "application/json"
+      - "application/json"
       responses:
         200:
           description: "successful operation"
@@ -39,18 +39,18 @@ paths:
             items:
               $ref: "#/definitions/Task"
       security:
-        - api_key: [ ]
+      - api_key: []
 
   /api/v1/task/<int:task_id>/notes:
     get:
       tags:
-        - "notes"
+      - "notes"
       summary: "Returns all notes for the task"
       description: ""
       consumes:
-        - "application/json"
+      - "application/json"
       produces:
-        - "application/json"
+      - "application/json"
       responses:
         200:
           description: "successful operation"
@@ -59,7 +59,7 @@ paths:
             items:
               $ref: "#/definitions/Note"
       security:
-        - api_key: [ ]
+      - api_key: []
 
   /api/v1/task/<int:task_id>/note:
     post:
