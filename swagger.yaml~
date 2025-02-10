@@ -67,23 +67,27 @@ paths:
         - "notes"
       summary: "Create a note for the task"
       description: ""
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                note:
-                  type: string
-                  description: Text for the note
-                  example: "yet meadow concerned quicker procurement indeed tensely gymnast gah"
-                parent_id:
-                  type: integer
-                  description: ID of the parent (if it is the reply) or null
-                  example: 25
-              required:
-                - note
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: body
+          name: body
+          description: "Note object that needs to be added"
+          required: true
+          schema:
+            type: object
+            properties:
+              note:
+                type: string
+                description: "Text of the note"
+                example: "Hello, this is a note."
+              parent_id:
+                type: integer
+                description: "ID of the parent (if it is the reply to another note) or null"
+                example: null
+
       responses:
         200:
           description: "successful operation"

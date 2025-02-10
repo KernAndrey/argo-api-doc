@@ -13,24 +13,24 @@ info:
 host: ""
 basePath: "/v2"
 tags:
-  - name: "tasks"
-    description: "Endpoints for project tasks"
-  - name: "notes"
-    description: "Access to Petstore orders"
+- name: "tasks"
+  description: "Endpoints for project tasks"
+- name: "notes"
+  description: "Access to Petstore orders"
 schemes:
-  - "https"
-  - "http"
+- "https"
+- "http"
 paths:
   /api/v1/tasks/:
     get:
       tags:
-        - "tasks"
+      - "tasks"
       summary: "Returns all active tasks  where user is estimator or technician"
       description: ""
       consumes:
-        - "application/json"
+      - "application/json"
       produces:
-        - "application/json"
+      - "application/json"
       responses:
         200:
           description: "successful operation"
@@ -39,18 +39,18 @@ paths:
             items:
               $ref: "#/definitions/Task"
       security:
-        - api_key: [ ]
+      - api_key: []
 
   /api/v1/task/<int:task_id>/notes:
     get:
       tags:
-        - "notes"
+      - "notes"
       summary: "Returns all notes for the task"
       description: ""
       consumes:
-        - "application/json"
+      - "application/json"
       produces:
-        - "application/json"
+      - "application/json"
       responses:
         200:
           description: "successful operation"
@@ -59,7 +59,7 @@ paths:
             items:
               $ref: "#/definitions/Note"
       security:
-        - api_key: [ ]
+      - api_key: []
 
   /api/v1/task/<int:task_id>/note:
     post:
@@ -67,23 +67,28 @@ paths:
         - "notes"
       summary: "Create a note for the task"
       description: ""
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                note:
-                  type: string
-                  description: Text for the note
-                  example: "yet meadow concerned quicker procurement indeed tensely gymnast gah"
-                parent_id:
-                  type: integer
-                  description: ID of the parent (if it is the reply) or null
-                  example: 25
-              required:
-                - note
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: body
+          name: body
+          description: "Note object that needs to be added"
+          required: true
+          schema:
+            type: object
+            properties:
+              note:
+                type: string
+                required: true
+                description: "Text of the note"
+                example: "Hello, this is a note."
+              parent_id:
+                type: integer
+                description: "ID of the parent (if it is the reply to another note) or null"
+                example: null
+
       responses:
         200:
           description: "successful operation"
