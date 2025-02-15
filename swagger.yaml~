@@ -81,6 +81,7 @@ paths:
             properties:
               note:
                 type: string
+                required: true
                 description: "Text of the note"
                 example: "Hello, this is a note."
               parent_id:

@@ -84,10 +84,6 @@ paths:
                 required: true
                 description: "Text of the note"
                 example: "Hello, this is a note."
-              parent_id:
-                type: integer
-                description: "ID of the parent (if it is the reply to another note) or null"
-                example: null
 
       responses:
         200:
@@ -140,41 +136,7 @@ definitions:
       employee:
         type: string
         example: "Amy Watson"
-      parent_id:
-        type: [ integer, "boolean" ]
-        example: false
-      child_ids:
-        type: array
-        items:
-          type: object
-          properties:
-            id:
-              type: integer
-              example: 17
-            note:
-              type: string
-              example: "yet meadow concerned quicker procurement indeed tensely gymnast gah"
-            employee:
-              type: string
-              example: "Mitchell Admin"
-            parent_id:
-              type: integer
-              example: 14
-            child_ids:
-              type: array
-              items:
-                type: object
-            attachment_ids:
-              type: array
-              items:
-                type: integer
-            created_by_app:
-              type: boolean
-              example: false
-            create_date:
-              type: string
-              format: date-time
-              example: "2025-02-10 08:48:41"
+
       attachment_ids:
         type: array
         items:
