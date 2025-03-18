@@ -15,6 +15,8 @@ basePath: "/v2"
 tags:
 - name: "Tasks"
   description: "Endpoints for project tasks"
+- name: "Services"
+  description: "Endpoints for task services (jobs)"
 - name: "Customers"
   description: "Endpoints for customers"
 - name: "Notes"
@@ -38,9 +40,12 @@ paths:
         200:
           description: "Successful operation"
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/TaskShort"
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "#/definitions/TaskShort"
         401:
           description: "Unauthorized. Token is invalid or expired."
       security:
@@ -66,7 +71,10 @@ paths:
         200:
           description: "Successful operation"
           schema:
-            $ref: "#/definitions/TaskDetails"
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/TaskDetails"
         401:
           description: "Unauthorized. Token is invalid or expired."
         403:
@@ -118,6 +126,43 @@ paths:
             description: "Task not found"
 
 
+  /api/v1/tasks/<int:task_id>/services:
+    get:
+      tags:
+      - "Tasks"
+      - "Services"
+      summary: "Returns all services for the task"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the task for which services to return"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "#/definitions/ServiceDetails"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. User is not assigned to this task."
+        404:
+          description: "Task not found"
+      security:
+      - api_key: []
+
+
   /api/v1/customer/<int:customer_id>:
     get:
       tags:
@@ -138,7 +183,10 @@ paths:
         200:
           description: "Successful operation"
           schema:
-            $ref: "#/definitions/CustomerDetails"
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/CustomerDetails"
         401:
           description: "Unauthorized. Token is invalid or expired."
         404:
@@ -150,6 +198,7 @@ paths:
   /api/v1/task/<int:task_id>/notes:
     get:
       tags:
+      - "Tasks"
       - "Notes"
       summary: "Returns all notes for the task"
       description: ""
@@ -161,9 +210,12 @@ paths:
         200:
           description: "Successful operation"
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Note"
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "#/definitions/Note"
         401:
           description: "Unauthorized. Token is invalid or expired."
         403:
@@ -176,6 +228,7 @@ paths:
   /api/v1/task/<int:task_id>/note:
     post:
       tags:
+        - "Tasks"
         - "Notes"
       summary: "Create a note for the task"
       description: ""
@@ -201,7 +254,10 @@ paths:
         201:
           description: "Successful operation"
           schema:
-            $ref: "#/definitions/Note"
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/Note"
         401:
           description: "Unauthorized. Token is invalid or expired."
       security:
@@ -508,3 +564,193 @@ definitions:
         type: string
         format: date-time
         example: "2025-02-10 09:30:26"
+
+  ServiceDetails:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 8
+      name:
+        type: string
+        example: "New Task - Glass - S00037"
+      product:
+        type: object
+        properties:
+          id:
+            type: integer
+            example: 70
+          name:
+            type: string
+            example: "Glass"
+          type:
+            type: string
+            example: "consu"
+          description:
+            type: boolean
+            example: false
+          category:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 15
+              name:
+                type: string
+                example: "All / Services"
+      description:
+        type: string
+        example: "DescriptionDescriptionDescriptionDescription"
+      estimators:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 6
+            name:
+              type: string
+              example: "Abigail Peterson"
+      technicians:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 14
+            name:
+              type: string
+              example: "Anita Oliver"
+      price:
+        type: number
+        example: 0
+      discount_percent:
+        type: number
+        example: 0
+      discount_amount:
+        type: number
+        example: 0
+      discount_amount_actual:
+        type: number
+        example: 0
+      price_with_discount:
+        type: number
+        example: 0
+      wrong_measurements:
+        type: boolean
+        example: false
+      estimate_job_rooms:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            name:
+              type: string
+              example: "Kitchen"
+      calculator_values:
+        type: object
+        properties:
+          calculator_type:
+            type: string
+            example: "other"
+          window_type:
+            type: boolean
+            example: false
+          door_type:
+            type: boolean
+            example: false
+          standard_window_dimensions:
+            type: string
+            example: "custom"
+          standard_door_dimensions:
+            type: boolean
+            example: false
+          custom_width:
+            type: number
+            example: 0
+          custom_width_fraction:
+            type: boolean
+            example: false
+          custom_height:
+            type: number
+            example: 0
+          custom_height_fraction:
+            type: boolean
+            example: false
+          need_to_remeasure:
+            type: boolean
+            example: false
+          door_frame_color:
+            type: boolean
+            example: false
+          window_frame_color:
+            type: boolean
+            example: false
+          glass_options:
+            type: string
+            example: "clear"
+          obscure_glass:
+            type: boolean
+            example: false
+          neat:
+            type: boolean
+            example: false
+          triple_pane_glass:
+            type: boolean
+            example: false
+          tempered:
+            type: boolean
+            example: false
+          glass_upcharge:
+            type: boolean
+            example: false
+          grids_type:
+            type: string
+            example: "no_grids"
+          flat_and_contour_grids_color:
+            type: string
+            example: "no_grids_color"
+          upgrade_handle:
+            type: boolean
+            example: false
+          blinds:
+            type: boolean
+            example: false
+          reinforced_meeting_rail:
+            type: boolean
+            example: false
+          foam_insulation_frame_sash:
+            type: boolean
+            example: false
+          energy_star:
+            type: boolean
+            example: false
+          escape_window:
+            type: boolean
+            example: false
+          brick_molding:
+            type: boolean
+            example: false
+          window_trims:
+            type: boolean
+            example: false
+          window_trims_price:
+            type: number
+            example: 0
+          window_capping:
+            type: boolean
+            example: false
+          window_capping_price:
+            type: number
+            example: 0
+          other_arch_elements:
+            type: boolean
+            example: false
+          other_arch_elements_price:
+            type: number
+            example: 0
