@@ -1,4 +1,6 @@
 name: Update Swagger UI
+permissions:
+  contents: write
 on:
   schedule:
     - cron:  '0 10 * * *'
