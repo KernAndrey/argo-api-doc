@@ -13,9 +13,11 @@ info:
 host: ""
 basePath: "/v2"
 tags:
-- name: "tasks"
+- name: "Tasks"
   description: "Endpoints for project tasks"
-- name: "notes"
+- name: "Customers"
+  description: "Endpoints for customers"
+- name: "Notes"
   description: "Access to Petstore orders"
 schemes:
 - "https"
@@ -25,7 +27,7 @@ paths:
   /api/v1/tasks/:
     get:
       tags:
-      - "tasks"
+      - "Tasks"
       summary: "Returns all active tasks  where user is estimator or technician"
       description: ""
       consumes:
@@ -47,7 +49,7 @@ paths:
   /api/v1/tasks/<int:task_id>:
     get:
       tags:
-      - "tasks"
+      - "Tasks"
       summary: "Returns task details by ID where user is estimator or technician"
       description: ""
       consumes:
@@ -71,14 +73,42 @@ paths:
           description: "Forbidden. User is not assigned to this task."
         404:
           description: "Task not found"
-
       security:
       - api_key: []
+
+  /api/v1/customer/<int:customer_id>:
+    get:
+      tags:
+      - "Customers"
+      summary: "Returns customer details by ID"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the customer to return"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/CustomerDetails"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        404:
+          description: "Customer not found"
+      security:
+      - api_key: []
+
 
   /api/v1/task/<int:task_id>/notes:
     get:
       tags:
-      - "notes"
+      - "Notes"
       summary: "Returns all notes for the task"
       description: ""
       consumes:
@@ -104,7 +134,7 @@ paths:
   /api/v1/task/<int:task_id>/note:
     post:
       tags:
-        - "notes"
+        - "Notes"
       summary: "Create a note for the task"
       description: ""
       consumes:
@@ -153,7 +183,7 @@ definitions:
         example: "Boiler maintenance"
       reference_number:
         type: string
-        example: 'N-1'
+        example: 'T-1'
       client:
         type: string
         example: "Colleen Diaz"
@@ -178,7 +208,7 @@ definitions:
         example: "Azure Interior, Brandon Freeman task"
       reference_number:
         type: string
-        example: "False-4"
+        example: "T-4"
       customer:
         type: object
         properties:
@@ -291,6 +321,126 @@ definitions:
           woodwork:
             type: string
             example: "picked_up_from_manufacturer"
+
+  CustomerDetails:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 27
+      name:
+        type: string
+        example: "Brandon Freeman"
+      title:
+        type: string
+        example: "Mister"
+      address:
+        type: string
+        example: "4557 De Silva St, 94538 Fremont, California, United States"
+      phone:
+        type: string
+        nullable: true
+        example: null
+      mobile:
+        type: string
+        nullable: true
+        example: null
+      email:
+        type: string
+        example: "brandon.freeman55@example.com"
+      tags:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 7
+            name:
+              type: string
+              example: "Desk Manufacturers"
+      previous_tasks:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 77
+            name:
+              type: string
+              example: "Find and fix leak"
+            reference_number:
+              type: string
+              example: "T-1"
+            status:
+              type: string
+              example: "01_in_progress"
+            create_date:
+              type: string
+              format: date-time
+              example: "2025-03-07 09:28:22"
+      notes:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1167
+            message_type:
+              type: string
+              example: "comment"
+            body:
+              type: string
+              example: "<p>123</p>"
+            author_name:
+              type: string
+              example: "Mitchell Admin"
+            create_date:
+              type: string
+              format: date-time
+              example: "2025-03-18 09:36:44"
+            write_date:
+              type: string
+              format: date-time
+              example: "2025-03-18 09:36:44"
+      attachments:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1336
+            name:
+              type: string
+              example: "istambul-varna.pdf"
+            mimetype:
+              type: string
+              example: "application/pdf"
+            size:
+              type: integer
+              example: 116755
+            store_fname:
+              type: string
+              example: "da/da02f4646032951ec1af9e289e8e5f7696289d34"
+            create_date:
+              type: string
+              format: date-time
+              example: "2025-03-18 09:53:17"
+            write_date:
+              type: string
+              format: date-time
+              example: "2025-03-18 09:53:17"
+      create_date:
+        type: string
+        format: date-time
+        example: "2025-03-07 09:20:55"
+      write_date:
+        type: string
+        format: date-time
+        example: "2025-03-18 09:53:09"
 
   Note:
     type: object
