@@ -407,6 +407,49 @@ paths:
       security:
         - api_key: [ ]
 
+  /api/v1/tasks/note/<int:note_id>/:
+    put:
+        tags:
+          - "Notes"
+        summary: "Update a note"
+        description: ""
+        consumes:
+            - "application/json"
+        produces:
+            - "application/json"
+        parameters:
+            - name: note_id
+              in: path
+              required: true
+              type: integer
+              description: "ID of the note to update"
+            - in: body
+              name: body
+              description: "Note object that needs to be updated"
+              required: true
+              schema:
+                  type: object
+                  properties:
+                    note:
+                        type: string
+                        required: true
+                        description: "Text of the note"
+                        example: "Hello, this is an updated note."
+        responses:
+            200:
+              description: "Successful operation"
+              schema:
+                  type: object
+                  properties:
+                  data:
+                      $ref: "#/definitions/Note"
+            401:
+              description: "Unauthorized. Token is invalid or expired."
+            404:
+              description: "Note not found"
+        security:
+            - api_key: []
+
 securityDefinitions:
   api_key:
     type: "apiKey"
