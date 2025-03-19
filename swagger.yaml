@@ -520,31 +520,7 @@ definitions:
       attachments:
         type: array
         items:
-          type: object
-          properties:
-            id:
-              type: integer
-              example: 1335
-            name:
-              type: string
-              example: "istambul-varna.pdf"
-            mimetype:
-              type: string
-              example: "application/pdf"
-            size:
-              type: integer
-              example: 116755
-            store_fname:
-              type: string
-              example: "da/da02f4646032951ec1af9e289e8e5f7696289d34"
-            create_date:
-              type: string
-              format: date-time
-              example: "2025-03-18 08:20:50"
-            write_date:
-              type: string
-              format: date-time
-              example: "2025-03-18 08:20:50"
+          $ref: "#/definitions/Attachment"
       parts_statuses:
         type: object
         properties:
@@ -650,31 +626,7 @@ definitions:
       attachments:
         type: array
         items:
-          type: object
-          properties:
-            id:
-              type: integer
-              example: 1336
-            name:
-              type: string
-              example: "istambul-varna.pdf"
-            mimetype:
-              type: string
-              example: "application/pdf"
-            size:
-              type: integer
-              example: 116755
-            store_fname:
-              type: string
-              example: "da/da02f4646032951ec1af9e289e8e5f7696289d34"
-            create_date:
-              type: string
-              format: date-time
-              example: "2025-03-18 09:53:17"
-            write_date:
-              type: string
-              format: date-time
-              example: "2025-03-18 09:53:17"
+          $ref: "#/definitions/Attachment"
       create_date:
         type: string
         format: date-time
@@ -684,6 +636,32 @@ definitions:
         format: date-time
         example: "2025-03-18 09:53:09"
 
+  Attachment:
+    type: object
+    properties:
+        id:
+            type: integer
+            example: 1336
+        name:
+            type: string
+            example: "document.pdf"
+        mimetype:
+            type: string
+            example: "application/pdf"
+        size:
+            type: integer
+            example: 116755
+        store_fname:
+            type: string
+            example: "da/da02f4646032951ec1af9e289e8e5f7696289d34"
+        create_date:
+            type: string
+            format: date-time
+            example: "2025-03-18 09:53:17"
+        write_date:
+            type: string
+            format: date-time
+            example: "2025-03-18 09:53:17"
   Note:
     type: object
     properties:
@@ -700,7 +678,7 @@ definitions:
       attachment_ids:
         type: array
         items:
-          type: integer
+          $ref: "#/definitions/Attachment"
       created_by_app:
         type: boolean
         example: true
