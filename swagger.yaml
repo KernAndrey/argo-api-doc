@@ -193,7 +193,151 @@ paths:
           description: "Customer not found"
       security:
       - api_key: []
+    put:
+      tags:
+      - "Customers"
+      summary: "Update customer details by ID"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the customer to update"
+        - in: body
+          name: body
+          description: "Customer object that needs to be updated. All fields are optional, but at least one field must be provided."
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Brandon Freeman"
+              phone:
+                type: string
+                example: "+1-202-555-0173"
+              mobile:
+                type: string
+                example: "+1-202-555-0173"
+              email:
+                type: string
+                example: "name@domain.com"
+              street:
+                type: string
+                example: "4557 De Silva St"
+              street2:
+                type: string
+                example: "Apt 123"
+              city:
+                type: string
+                example: "Fremont"
+              zip:
+                type: string
+                example: "94538"
+              state_id:
+                type: integer
+                example: 1
+              country_id:
+                type: integer
+                example: 1
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+              type: object
+              properties:
+                data:
+                  type: string
+                  example: "Customer updated successfully."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        404:
+          description: "Customer not found"
+      security:
+      - api_key: []
 
+  /api/v1/countries/:
+    get:
+      tags:
+      - "Customers"
+      summary: "Returns all countries"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 233
+                    code:
+                      type: string
+                      example: "US"
+                    name:
+                      type: string
+                      example: "United States"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+      security:
+      - api_key: []
+
+  /api/v1/states/<int:country_id>:
+    get:
+      tags:
+      - "Customers"
+      summary: "Returns all states for the given country"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+        - name: country_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the country for which to return states"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    code:
+                      type: string
+                      example: "CA"
+                    name:
+                      type: string
+                      example: "California"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        404:
+          description: "Country not found"
+      security:
+      - api_key: []
 
   /api/v1/task/<int:task_id>/notes:
     get:
