@@ -193,8 +193,8 @@ paths:
           schema:
             type: object
             properties:
-            data:
-              $ref: "#/definitions/ServiceDetails"
+              data:
+                $ref: "#/definitions/ServiceDetails"
         400:
           description: "Bad request. Invalid input."
         401:
@@ -484,8 +484,8 @@ paths:
               schema:
                   type: object
                   properties:
-                  data:
-                      $ref: "#/definitions/Note"
+                    data:
+                        $ref: "#/definitions/Note"
             401:
               description: "Unauthorized. Token is invalid or expired."
             404:
@@ -726,7 +726,6 @@ definitions:
             example: "4557 De Silva St, 94538 Fremont, California, United States"
           phone:
             type: string
-            nullable: true
             example: "N/A"
       status:
         type: string
@@ -818,11 +817,9 @@ definitions:
         example: "4557 De Silva St, 94538 Fremont, California, United States"
       phone:
         type: string
-        nullable: true
         example: null
       mobile:
         type: string
-        nullable: true
         example: null
       email:
         type: string
