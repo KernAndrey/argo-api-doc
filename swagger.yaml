@@ -166,45 +166,45 @@ paths:
 
   /api/v1/task/<int:task_id>/service:
     post:
-        tags:
-        - "Tasks"
-        - "Services"
-        summary: "Create a service for the task"
-        description: ""
-        consumes:
-        - "application/json"
-        produces:
-        - "application/json"
-        parameters:
-            - name: task_id
-              in: path
-              required: true
-              type: integer
-              description: "ID of the task to which the service belongs"
-            - in: body
-              name: body
-              description: "Service object that needs to be added"
-              required: true
-              schema:
-                  $ref: "#/definitions/ServicePost"
-        responses:
-            201:
-              description: "Successful operation"
-            schema:
-                type: object
-                properties:
-                data:
-                    $ref: "#/definitions/ServiceDetails"
-            400:
-              description: "Bad request. Invalid input."
-            401:
-              description: "Unauthorized. Token is invalid or expired."
-            403:
-              description: "Forbidden. User is not assigned to this task."
-            404:
-              description: "Task not found"
-        security:
-        - api_key: []
+      tags:
+      - "Tasks"
+      - "Services"
+      summary: "Create a service for the task"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the task to which the service belongs"
+        - in: body
+          name: body
+          description: "Service object that needs to be added"
+          required: true
+          schema:
+            $ref: "#/definitions/ServicePost"
+      responses:
+        201:
+          description: "Successful operation"
+        schema:
+          type: object
+          properties:
+          data:
+            $ref: "#/definitions/ServiceDetails"
+        400:
+          description: "Bad request. Invalid input."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. User is not assigned to this task."
+        404:
+          description: "Task not found"
+      security:
+      - api_key: []
 
   /api/v1/customer/<int:customer_id>:
     get:
