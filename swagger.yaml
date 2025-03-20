@@ -21,6 +21,8 @@ tags:
   description: "Endpoints for customers"
 - name: "Notes"
   description: "Access to Petstore orders"
+- name: "Attachments"
+  description: "Endpoints for task attachments"
 schemes:
 - "https"
 - "http"
@@ -162,6 +164,47 @@ paths:
       security:
       - api_key: []
 
+  /api/v1/task/<int:task_id>/service:
+    post:
+        tags:
+        - "Tasks"
+        - "Services"
+        summary: "Create a service for the task"
+        description: ""
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+            - name: task_id
+              in: path
+              required: true
+              type: integer
+              description: "ID of the task to which the service belongs"
+            - in: body
+              name: body
+              description: "Service object that needs to be added"
+              required: true
+              schema:
+                  $ref: "#/definitions/ServicePost"
+        responses:
+            201:
+              description: "Successful operation"
+            schema:
+                type: object
+                properties:
+                data:
+                    $ref: "#/definitions/ServiceDetails"
+            400:
+              description: "Bad request. Invalid input."
+            401:
+              description: "Unauthorized. Token is invalid or expired."
+            403:
+              description: "Forbidden. User is not assigned to this task."
+            404:
+              description: "Task not found"
+        security:
+        - api_key: []
 
   /api/v1/customer/<int:customer_id>:
     get:
@@ -450,6 +493,181 @@ paths:
         security:
             - api_key: []
 
+  /api/v1/attachment/<int:attachment_id>:
+    get:
+      tags:
+      - "Attachments"
+      summary: "Returns attachment by ID in base64 format"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+        - name: attachment_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the attachment to return"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/AttachmentBase64"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        404:
+          description: "Attachment not found"
+      security:
+      - api_key: []
+
+  /api/v1/service/<int:service_id>/attachment/:
+    post:
+        tags:
+        - "Attachments"
+        summary: "Upload an attachment for the service and create a copy to the task"
+        description: ""
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+            - name: service_id
+              in: path
+              required: true
+              type: integer
+              description: "ID of the service to which the attachment belongs"
+            - in: body
+              name: body
+              description: "Attachment object that needs to be added"
+              required: true
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: "document.pdf"
+                  data_base64:
+                    type: string
+                    example: "JVBERi0xLjQKJeLjz9MKNCAwIG9iago8PC9UeXBlL1hSZW5kZXIvUGFnZXMvUGFnZVsvNjYv..."
+        responses:
+            201:
+              description: "Successful operation"
+              schema:
+                  type: object
+                  properties:
+                    data:
+                        $ref: "#/definitions/Attachment"
+            400:
+              description: "Bad request. Invalid input."
+            401:
+              description: "Unauthorized. Token is invalid or expired."
+            403:
+              description: "Forbidden. User is not assigned to this service."
+            404:
+              description: "Service not found"
+        security:
+        - api_key: []
+
+  /api/v1/task/<int:service_id>/attachment/:
+    post:
+        tags:
+        - "Attachments"
+        - "Tasks"
+        summary: "Upload an attachment for the task"
+        description: ""
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+            - name: task_id
+              in: path
+              required: true
+              type: integer
+              description: "ID of the task to which the attachment belongs"
+            - in: body
+              name: body
+              description: "Attachment object that needs to be added"
+              required: true
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: "document.pdf"
+                  data_base64:
+                    type: string
+                    example: "JVBERi0xLjQKJeLjz9MKNCAwIG9iago8PC9UeXBlL1hSZW5kZXIvUGFnZXMvUGFnZVsvNjYv..."
+        responses:
+            201:
+              description: "Successful operation"
+              schema:
+                  type: object
+                  properties:
+                    data:
+                        $ref: "#/definitions/Attachment"
+            400:
+              description: "Bad request. Invalid input."
+            401:
+              description: "Unauthorized. Token is invalid or expired."
+            403:
+              description: "Forbidden. User is not assigned to this task."
+            404:
+              description: "Service not found"
+        security:
+        - api_key: []
+
+  /api/v1/customer/<int:customer_id>/attachment/:
+    post:
+        tags:
+        - "Attachments"
+        - "Customers"
+        summary: "Upload an attachment for the customer"
+        description: ""
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+            - name: task_id
+              in: path
+              required: true
+              type: integer
+              description: "ID of the task to which the attachment belongs"
+            - in: body
+              name: body
+              description: "Attachment object that needs to be added"
+              required: true
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: "document.pdf"
+                  data_base64:
+                    type: string
+                    example: "JVBERi0xLjQKJeLjz9MKNCAwIG9iago8PC9UeXBlL1hSZW5kZXIvUGFnZXMvUGFnZVsvNjYv..."
+        responses:
+            201:
+              description: "Successful operation"
+              schema:
+                  type: object
+                  properties:
+                    data:
+                        $ref: "#/definitions/Attachment"
+            400:
+              description: "Bad request. Invalid input."
+            401:
+              description: "Unauthorized. Token is invalid or expired."
+            404:
+              description: "Service not found"
+        security:
+        - api_key: []
+
 securityDefinitions:
   api_key:
     type: "apiKey"
@@ -694,9 +912,6 @@ definitions:
         size:
             type: integer
             example: 116755
-        store_fname:
-            type: string
-            example: "da/da02f4646032951ec1af9e289e8e5f7696289d34"
         create_date:
             type: string
             format: date-time
@@ -705,6 +920,34 @@ definitions:
             type: string
             format: date-time
             example: "2025-03-18 09:53:17"
+
+  AttachmentBase64:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1336
+      name:
+        type: string
+        example: "document.pdf"
+      mimetype:
+        type: string
+        example: "application/pdf"
+      size:
+        type: integer
+        example: 116755
+      data_base64:
+        type: string
+        example: "JVBERi0xLjQKJeLjz9MKNCAwIG9iago8PC9UeXBlL1hSZW5kZXIvUGFnZXMvUGFnZVsvNjYv..."
+      create_date:
+        type: string
+        format: date-time
+        example: "2025-03-18 09:53:17"
+      write_date:
+        type: string
+        format: date-time
+        example: "2025-03-18 09:53:17"
+
   Note:
     type: object
     properties:
@@ -763,6 +1006,15 @@ definitions:
               name:
                 type: string
                 example: "All / Services"
+      sale_order:
+        type: object
+        properties:
+          id:
+            type: integer
+            example: 37
+          name:
+            type: string
+            example: "S00037"
       description:
         type: string
         example: "DescriptionDescriptionDescriptionDescription"
@@ -817,105 +1069,219 @@ definitions:
             name:
               type: string
               example: "Kitchen"
-      calculator_values:
-        type: object
-        properties:
-          calculator_type:
-            type: string
-            example: "other"
-          window_type:
-            type: boolean
-            example: false
-          door_type:
-            type: boolean
-            example: false
-          standard_window_dimensions:
-            type: string
-            example: "custom"
-          standard_door_dimensions:
-            type: boolean
-            example: false
-          custom_width:
-            type: number
-            example: 0
-          custom_width_fraction:
-            type: boolean
-            example: false
-          custom_height:
-            type: number
-            example: 0
-          custom_height_fraction:
-            type: boolean
-            example: false
-          need_to_remeasure:
-            type: boolean
-            example: false
-          door_frame_color:
-            type: boolean
-            example: false
-          window_frame_color:
-            type: boolean
-            example: false
-          glass_options:
-            type: string
-            example: "clear"
-          obscure_glass:
-            type: boolean
-            example: false
-          neat:
-            type: boolean
-            example: false
-          triple_pane_glass:
-            type: boolean
-            example: false
-          tempered:
-            type: boolean
-            example: false
-          glass_upcharge:
-            type: boolean
-            example: false
-          grids_type:
-            type: string
-            example: "no_grids"
-          flat_and_contour_grids_color:
-            type: string
-            example: "no_grids_color"
-          upgrade_handle:
-            type: boolean
-            example: false
-          blinds:
-            type: boolean
-            example: false
-          reinforced_meeting_rail:
-            type: boolean
-            example: false
-          foam_insulation_frame_sash:
-            type: boolean
-            example: false
-          energy_star:
-            type: boolean
-            example: false
-          escape_window:
-            type: boolean
-            example: false
-          brick_molding:
-            type: boolean
-            example: false
-          window_trims:
-            type: boolean
-            example: false
-          window_trims_price:
-            type: number
-            example: 0
-          window_capping:
-            type: boolean
-            example: false
-          window_capping_price:
-            type: number
-            example: 0
-          other_arch_elements:
-            type: boolean
-            example: false
-          other_arch_elements_price:
-            type: number
-            example: 0
+      calculator_type:
+        type: string
+        example: "other"
+      window_type:
+        type: boolean
+        example: false
+      door_type:
+        type: boolean
+        example: false
+      standard_window_dimensions:
+        type: string
+        example: "custom"
+      standard_door_dimensions:
+        type: boolean
+        example: false
+      custom_width:
+        type: number
+        example: 0
+      custom_width_fraction:
+        type: boolean
+        example: false
+      custom_height:
+        type: number
+        example: 0
+      custom_height_fraction:
+        type: boolean
+        example: false
+      need_to_remeasure:
+        type: boolean
+        example: false
+      door_frame_color:
+        type: string
+        example: 'white_interior_white_exterior'
+      window_frame_color:
+        type: string
+        example: 'almond_interior_almond_exterior_extruded'
+      glass_options:
+        type: string
+        example: "clear"
+      obscure_glass:
+        type: boolean
+        example: false
+      neat:
+        type: boolean
+        example: false
+      triple_pane_glass:
+        type: boolean
+        example: false
+      tempered:
+        type: boolean
+        example: false
+      glass_upcharge:
+        type: boolean
+        example: false
+      grids_type:
+        type: string
+        example: "no_grids"
+      flat_and_contour_grids_color:
+        type: string
+        example: "no_grids_color"
+      upgrade_handle:
+        type: boolean
+        example: false
+      blinds:
+        type: string
+        example: 'no_blinds'
+      reinforced_meeting_rail:
+        type: string
+        example: '5'
+      foam_insulation_frame_sash:
+        type: boolean
+        example: false
+      energy_star:
+        type: boolean
+        example: false
+      escape_window:
+        type: boolean
+        example: false
+      brick_molding:
+        type: boolean
+        example: false
+      window_trims:
+        type: boolean
+        example: false
+      window_trims_price:
+        type: number
+        example: 0
+      window_capping:
+        type: boolean
+        example: false
+      window_capping_price:
+        type: number
+        example: 0
+      other_arch_elements:
+        type: boolean
+        example: false
+      other_arch_elements_price:
+        type: number
+        example: 0
+
+  ServicePost:
+    type: object
+    properties:
+      product_id:
+        type: integer
+        example: 7
+      sale_order_id:
+        type: integer
+        example: 37
+      description:
+        type: string
+        example: "DescriptionDescriptionDescriptionDescription"
+      role:
+        type: string
+        example: "Either 'technician' or 'estimator'"
+      price:
+        type: number
+        example: 0
+      discount_percent:
+        type: number
+        example: 0
+      discount_amount:
+        type: number
+        example: 0
+      wrong_measurements:
+        type: boolean
+        example: false
+      estimate_job_room_ids:
+        type: array
+        items:
+          type: integer
+          example: [1, 2, 3]
+      window_type:
+        type: boolean
+        example: false
+      door_type:
+        type: boolean
+        example: false
+      standard_window_dimensions:
+        type: string
+        example: "custom"
+      standard_door_dimensions:
+        type: boolean
+        example: false
+      custom_width_fraction:
+        type: string
+        example: '1-1/2, 1 1/2'
+      custom_height_fraction:
+        type: string
+        example: '1-1/2, 1 1/2'
+      need_to_remeasure:
+        type: boolean
+        example: false
+      door_frame_color:
+        type: string
+        example: 'white_interior_white_exterior'
+      window_frame_color:
+        type: string
+        example: 'almond_interior_almond_exterior_extruded'
+      glass_options:
+        type: string
+        example: "clear"
+      obscure_glass:
+        type: boolean
+        example: false
+      neat:
+        type: boolean
+        example: false
+      triple_pane_glass:
+        type: boolean
+        example: false
+      tempered:
+        type: boolean
+        example: false
+      glass_upcharge:
+        type: boolean
+        example: false
+      grids_type:
+        type: string
+        example: "no_grids"
+      flat_and_contour_grids_color:
+        type: string
+        example: "no_grids_color"
+      upgrade_handle:
+        type: boolean
+        example: false
+      blinds:
+        type: string
+        example: no_blinds
+      reinforced_meeting_rail:
+        type: string
+        example: '5'
+      foam_insulation_frame_sash:
+        type: boolean
+        example: false
+      energy_star:
+        type: boolean
+        example: false
+      escape_window:
+        type: boolean
+        example: false
+      brick_molding:
+        type: boolean
+        example: false
+      window_trims:
+        type: boolean
+        example: false
+      window_capping:
+        type: boolean
+        example: false
+      other_arch_elements:
+        type: boolean
+        example: false
+      other_arch_elements_price:
+        type: number
+        example: 0
