@@ -13,31 +13,33 @@ info:
 host: ""
 basePath: "/v2"
 tags:
-- name: "Tasks"
-  description: "Endpoints for project tasks"
-- name: "Services"
-  description: "Endpoints for task services (jobs)"
-- name: "Customers"
-  description: "Endpoints for customers"
-- name: "Notes"
-  description: "Access to Petstore orders"
-- name: "Attachments"
-  description: "Endpoints for task attachments"
+  - name: "Tasks"
+    description: "Endpoints for project tasks"
+  - name: "Services"
+    description: "Endpoints for task services (jobs)"
+  - name: "Customers"
+    description: "Endpoints for customers"
+  - name: "Notes"
+    description: "Access to Petstore orders"
+  - name: "Attachments"
+    description: "Endpoints for task attachments"
+  - name: "Sale Orders"
+    description: "Endpoints for sale orders"
 schemes:
-- "https"
-- "http"
+  - "https"
+  - "http"
 
 paths:
   /api/v1/tasks/:
     get:
       tags:
-      - "Tasks"
+        - "Tasks"
       summary: "Returns all active tasks  where user is estimator or technician"
       description: ""
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "Successful operation"
@@ -51,18 +53,18 @@ paths:
         401:
           description: "Unauthorized. Token is invalid or expired."
       security:
-      - api_key: []
+        - api_key: [ ]
 
   /api/v1/tasks/<int:task_id>:
     get:
       tags:
-      - "Tasks"
+        - "Tasks"
       summary: "Returns task details by ID where user is estimator or technician"
       description: ""
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
         - name: task_id
           in: path
@@ -84,7 +86,7 @@ paths:
         404:
           description: "Task not found"
       security:
-      - api_key: []
+        - api_key: [ ]
 
   /api/v1/task/<int:task_id>/set-mechanism-status:
     put:
@@ -93,52 +95,52 @@ paths:
       summary: 'Set mechanism status for the task'
       description: ""
       consumes:
-          - "application/json"
+        - "application/json"
       produces:
-          - "application/json"
+        - "application/json"
       parameters:
-          - in: body
-            name: body
-            description: "Mechanism status object that needs to be added"
-            required: true
-            schema:
-              type: object
-              properties:
-                mechanism_part_status:
-                  type: string
-                  required: true
-                  description: "Status of the mechanism. Allowed values are: n/a, to_order, ordered, ready_to_pick_up_from_manufacturer, picked_up_from_manufacturer, delivered_to_destination_warehouse"
-                  example: "delivered_to_destination_warehouse"
+        - in: body
+          name: body
+          description: "Mechanism status object that needs to be added"
+          required: true
+          schema:
+            type: object
+            properties:
+              mechanism_part_status:
+                type: string
+                required: true
+                description: "Status of the mechanism. Allowed values are: n/a, to_order, ordered, ready_to_pick_up_from_manufacturer, picked_up_from_manufacturer, delivered_to_destination_warehouse"
+                example: "delivered_to_destination_warehouse"
       responses:
-          200:
-            description: "Successful operation"
-            schema:
-              type: object
-              properties:
-                data:
-                  type: string
-                  example: "Mechanism part status updated successfully."
-          400:
-            description: 'Bad request. Invalid input.'
-          401:
-            description: "Unauthorized. Token is invalid or expired."
-          403:
-            description: "Forbidden. User is not assigned to this task."
-          404:
-            description: "Task not found"
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: string
+                example: "Mechanism part status updated successfully."
+        400:
+          description: 'Bad request. Invalid input.'
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. User is not assigned to this task."
+        404:
+          description: "Task not found"
 
 
   /api/v1/tasks/<int:task_id>/services:
     get:
       tags:
-      - "Tasks"
-      - "Services"
+        - "Tasks"
+        - "Services"
       summary: "Returns all services for the task"
       description: ""
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
         - name: task_id
           in: path
@@ -162,19 +164,19 @@ paths:
         404:
           description: "Task not found"
       security:
-      - api_key: []
+        - api_key: [ ]
 
   /api/v1/task/<int:task_id>/service:
     post:
       tags:
-      - "Tasks"
-      - "Services"
+        - "Tasks"
+        - "Services"
       summary: "Create a service for the task"
       description: ""
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
         - name: task_id
           in: path
@@ -204,18 +206,18 @@ paths:
         404:
           description: "Task not found"
       security:
-      - api_key: []
+        - api_key: [ ]
 
   /api/v1/customer/<int:customer_id>:
     get:
       tags:
-      - "Customers"
+        - "Customers"
       summary: "Returns customer details by ID"
       description: ""
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
         - name: customer_id
           in: path
@@ -235,16 +237,16 @@ paths:
         404:
           description: "Customer not found"
       security:
-      - api_key: []
+        - api_key: [ ]
     put:
       tags:
-      - "Customers"
+        - "Customers"
       summary: "Update customer details by ID"
       description: ""
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
         - name: customer_id
           in: path
@@ -292,28 +294,28 @@ paths:
         200:
           description: "Successful operation"
           schema:
-              type: object
-              properties:
-                data:
-                  type: string
-                  example: "Customer updated successfully."
+            type: object
+            properties:
+              data:
+                type: string
+                example: "Customer updated successfully."
         401:
           description: "Unauthorized. Token is invalid or expired."
         404:
           description: "Customer not found"
       security:
-      - api_key: []
+        - api_key: [ ]
 
   /api/v1/countries/:
     get:
       tags:
-      - "Customers"
+        - "Customers"
       summary: "Returns all countries"
       description: ""
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "Successful operation"
@@ -337,18 +339,18 @@ paths:
         401:
           description: "Unauthorized. Token is invalid or expired."
       security:
-      - api_key: []
+        - api_key: [ ]
 
   /api/v1/states/<int:country_id>:
     get:
       tags:
-      - "Customers"
+        - "Customers"
       summary: "Returns all states for the given country"
       description: ""
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
         - name: country_id
           in: path
@@ -380,19 +382,19 @@ paths:
         404:
           description: "Country not found"
       security:
-      - api_key: []
+        - api_key: [ ]
 
   /api/v1/task/<int:task_id>/notes:
     get:
       tags:
-      - "Tasks"
-      - "Notes"
+        - "Tasks"
+        - "Notes"
       summary: "Returns all notes for the task"
       description: ""
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "Successful operation"
@@ -410,7 +412,7 @@ paths:
         404:
           description: "Task not found"
       security:
-      - api_key: []
+        - api_key: [ ]
 
   /api/v1/task/<int:task_id>/note:
     post:
@@ -452,57 +454,57 @@ paths:
 
   /api/v1/tasks/note/<int:note_id>/:
     put:
-        tags:
-          - "Notes"
-        summary: "Update a note"
-        description: ""
-        consumes:
-            - "application/json"
-        produces:
-            - "application/json"
-        parameters:
-            - name: note_id
-              in: path
-              required: true
-              type: integer
-              description: "ID of the note to update"
-            - in: body
-              name: body
-              description: "Note object that needs to be updated"
-              required: true
-              schema:
-                  type: object
-                  properties:
-                    note:
-                        type: string
-                        required: true
-                        description: "Text of the note"
-                        example: "Hello, this is an updated note."
-        responses:
-            200:
-              description: "Successful operation"
-              schema:
-                  type: object
-                  properties:
-                    data:
-                        $ref: "#/definitions/Note"
-            401:
-              description: "Unauthorized. Token is invalid or expired."
-            404:
-              description: "Note not found"
-        security:
-            - api_key: []
+      tags:
+        - "Notes"
+      summary: "Update a note"
+      description: ""
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: note_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the note to update"
+        - in: body
+          name: body
+          description: "Note object that needs to be updated"
+          required: true
+          schema:
+            type: object
+            properties:
+              note:
+                type: string
+                required: true
+                description: "Text of the note"
+                example: "Hello, this is an updated note."
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/Note"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        404:
+          description: "Note not found"
+      security:
+        - api_key: [ ]
 
   /api/v1/attachment/<int:attachment_id>:
     get:
       tags:
-      - "Attachments"
+        - "Attachments"
       summary: "Returns attachment by ID in base64 format"
       description: ""
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
         - name: attachment_id
           in: path
@@ -522,237 +524,271 @@ paths:
         404:
           description: "Attachment not found"
       security:
-      - api_key: []
+        - api_key: [ ]
 
   /api/v1/service/<int:service_id>/attachment/:
     post:
-        tags:
+      tags:
         - "Attachments"
-        summary: "Upload an attachment for the service and create a copy to the task"
-        description: ""
-        consumes:
+      summary: "Upload an attachment for the service and create a copy to the task"
+      description: ""
+      consumes:
         - "application/json"
-        produces:
+      produces:
         - "application/json"
-        parameters:
-            - name: service_id
-              in: path
-              required: true
-              type: integer
-              description: "ID of the service to which the attachment belongs"
-            - in: body
-              name: body
-              description: "Attachment object that needs to be added"
-              required: true
-              schema:
-                type: object
-                properties:
-                  name:
-                    type: string
-                    example: "document.pdf"
-                  data_base64:
-                    type: string
-                    example: "JVBERi0xLjQKJeLjz9MKNCAwIG9iago8PC9UeXBlL1hSZW5kZXIvUGFnZXMvUGFnZVsvNjYv..."
-        responses:
-            201:
-              description: "Successful operation"
-              schema:
-                  type: object
-                  properties:
-                    data:
-                        $ref: "#/definitions/Attachment"
-            400:
-              description: "Bad request. Invalid input."
-            401:
-              description: "Unauthorized. Token is invalid or expired."
-            403:
-              description: "Forbidden. User is not assigned to this service."
-            404:
-              description: "Service not found"
-        security:
-        - api_key: []
+      parameters:
+        - name: service_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the service to which the attachment belongs"
+        - in: body
+          name: body
+          description: "Attachment object that needs to be added"
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "document.pdf"
+              data_base64:
+                type: string
+                example: "JVBERi0xLjQKJeLjz9MKNCAwIG9iago8PC9UeXBlL1hSZW5kZXIvUGFnZXMvUGFnZVsvNjYv..."
+      responses:
+        201:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/Attachment"
+        400:
+          description: "Bad request. Invalid input."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. User is not assigned to this service."
+        404:
+          description: "Service not found"
+      security:
+        - api_key: [ ]
 
   /api/v1/task/<int:service_id>/attachment/:
     post:
-        tags:
+      tags:
         - "Attachments"
         - "Tasks"
-        summary: "Upload an attachment for the task"
-        description: ""
-        consumes:
+      summary: "Upload an attachment for the task"
+      description: ""
+      consumes:
         - "application/json"
-        produces:
+      produces:
         - "application/json"
-        parameters:
-            - name: task_id
-              in: path
-              required: true
-              type: integer
-              description: "ID of the task to which the attachment belongs"
-            - in: body
-              name: body
-              description: "Attachment object that needs to be added"
-              required: true
-              schema:
-                type: object
-                properties:
-                  name:
-                    type: string
-                    example: "document.pdf"
-                  data_base64:
-                    type: string
-                    example: "JVBERi0xLjQKJeLjz9MKNCAwIG9iago8PC9UeXBlL1hSZW5kZXIvUGFnZXMvUGFnZVsvNjYv..."
-        responses:
-            201:
-              description: "Successful operation"
-              schema:
-                  type: object
-                  properties:
-                    data:
-                        $ref: "#/definitions/Attachment"
-            400:
-              description: "Bad request. Invalid input."
-            401:
-              description: "Unauthorized. Token is invalid or expired."
-            403:
-              description: "Forbidden. User is not assigned to this task."
-            404:
-              description: "Service not found"
-        security:
-        - api_key: []
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the task to which the attachment belongs"
+        - in: body
+          name: body
+          description: "Attachment object that needs to be added"
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "document.pdf"
+              data_base64:
+                type: string
+                example: "JVBERi0xLjQKJeLjz9MKNCAwIG9iago8PC9UeXBlL1hSZW5kZXIvUGFnZXMvUGFnZVsvNjYv..."
+      responses:
+        201:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/Attachment"
+        400:
+          description: "Bad request. Invalid input."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. User is not assigned to this task."
+        404:
+          description: "Service not found"
+      security:
+        - api_key: [ ]
 
   /api/v1/customer/<int:customer_id>/attachment/:
     post:
-        tags:
+      tags:
         - "Attachments"
         - "Customers"
-        summary: "Upload an attachment for the customer"
-        description: ""
-        consumes:
+      summary: "Upload an attachment for the customer"
+      description: ""
+      consumes:
         - "application/json"
-        produces:
+      produces:
         - "application/json"
-        parameters:
-            - name: task_id
-              in: path
-              required: true
-              type: integer
-              description: "ID of the task to which the attachment belongs"
-            - in: body
-              name: body
-              description: "Attachment object that needs to be added"
-              required: true
-              schema:
-                type: object
-                properties:
-                  name:
-                    type: string
-                    example: "document.pdf"
-                  data_base64:
-                    type: string
-                    example: "JVBERi0xLjQKJeLjz9MKNCAwIG9iago8PC9UeXBlL1hSZW5kZXIvUGFnZXMvUGFnZVsvNjYv..."
-        responses:
-            201:
-              description: "Successful operation"
-              schema:
-                  type: object
-                  properties:
-                    data:
-                        $ref: "#/definitions/Attachment"
-            400:
-              description: "Bad request. Invalid input."
-            401:
-              description: "Unauthorized. Token is invalid or expired."
-            404:
-              description: "Service not found"
-        security:
-        - api_key: []
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the task to which the attachment belongs"
+        - in: body
+          name: body
+          description: "Attachment object that needs to be added"
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "document.pdf"
+              data_base64:
+                type: string
+                example: "JVBERi0xLjQKJeLjz9MKNCAwIG9iago8PC9UeXBlL1hSZW5kZXIvUGFnZXMvUGFnZVsvNjYv..."
+      responses:
+        201:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/Attachment"
+        400:
+          description: "Bad request. Invalid input."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        404:
+          description: "Service not found"
+      security:
+        - api_key: [ ]
 
   /api/v1/task/<int:task_id>/sale_orders/:
     get:
-        tags:
+      tags:
         - "Tasks"
         - "Services"
-        summary: "Returns all sale orders for the task"
-        description: ""
-        consumes:
+        - "Sale Orders"
+      summary: "Returns all sale orders for the task"
+      description: ""
+      consumes:
         - "application/json"
-        produces:
+      produces:
         - "application/json"
-        parameters:
-            - name: task_id
-              in: path
-              required: true
-              type: integer
-              description: "ID of the task for which sale orders to return"
-        responses:
-            200:
-              description: "Successful operation"
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/definitions/SaleOrder"
-            401:
-              description: "Unauthorized. Token is invalid or expired."
-            403:
-              description: "Forbidden. User is not assigned to this task."
-            404:
-              description: "Task not found"
-        security:
-        - api_key: []
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the task for which sale orders to return"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "#/definitions/SaleOrder"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. User is not assigned to this task."
+        404:
+          description: "Task not found"
+      security:
+        - api_key: [ ]
 
   /api/v1/estimate_job_rooms:
     get:
-        tags:
+      tags:
         - "Services"
-        summary: "Returns all estimate job rooms"
-        description: ""
-        consumes:
+      summary: "Returns all estimate job rooms"
+      description: ""
+      consumes:
         - "application/json"
-        produces:
+      produces:
         - "application/json"
-        responses:
-            200:
-              description: "Successful operation"
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/definitions/EstimateJobRoom"
-            401:
-              description: "Unauthorized. Token is invalid or expired."
-        security:
-        - api_key: []
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "#/definitions/EstimateJobRoom"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+      security:
+        - api_key: [ ]
 
   /api/v1/products/:
     get:
-        tags:
+      tags:
         - "Services"
-        summary: "Returns all products in category 'All / Services' and subcategories"
-        description: ""
-        consumes:
+      summary: "Returns all products in category 'All / Services' and subcategories"
+      description: ""
+      consumes:
         - "application/json"
-        produces:
+      produces:
         - "application/json"
-        responses:
-            200:
-              description: "Successful operation"
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/definitions/Product"
-            401:
-              description: "Unauthorized. Token is invalid or expired."
-        security:
-        - api_key: []
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "#/definitions/Product"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+      security:
+        - api_key: [ ]
+
+  /api/v1/sale_order/<int:sale_order_id>/portal_url/:
+    get:
+      tags:
+        - "Services"
+        - "Sale Orders"
+      summary: "Returns portal URL for the sale order by ID. Customer can use it to sign, pay, and download the sale order."
+      description: ""
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: sale_order_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the sale order to return portal URL for"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: string
+                example: "https://example.com/my/orders/38?access_token=3acfce93-03dc-4945-9d2f-83dc607dfeb0"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        404:
+          description: "Sale order not found"
+      security:
+        - api_key: [ ]
 
 securityDefinitions:
   api_key:
@@ -983,26 +1019,26 @@ definitions:
   Attachment:
     type: object
     properties:
-        id:
-            type: integer
-            example: 1336
-        name:
-            type: string
-            example: "document.pdf"
-        mimetype:
-            type: string
-            example: "application/pdf"
-        size:
-            type: integer
-            example: 116755
-        create_date:
-            type: string
-            format: date-time
-            example: "2025-03-18 09:53:17"
-        write_date:
-            type: string
-            format: date-time
-            example: "2025-03-18 09:53:17"
+      id:
+        type: integer
+        example: 1336
+      name:
+        type: string
+        example: "document.pdf"
+      mimetype:
+        type: string
+        example: "application/pdf"
+      size:
+        type: integer
+        example: 116755
+      create_date:
+        type: string
+        format: date-time
+        example: "2025-03-18 09:53:17"
+      write_date:
+        type: string
+        format: date-time
+        example: "2025-03-18 09:53:17"
 
   AttachmentBase64:
     type: object
@@ -1247,7 +1283,7 @@ definitions:
         type: array
         items:
           type: integer
-          example: [1, 2, 3]
+          example: [ 1, 2, 3 ]
       window_type:
         type: boolean
         example: false
