@@ -668,6 +668,42 @@ paths:
         security:
         - api_key: []
 
+  /api/v1/task/<int:task_id>/sale_orders/:
+    get:
+        tags:
+        - "Tasks"
+        - "Services"
+        summary: "Returns all sale orders for the task"
+        description: ""
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+            - name: task_id
+              in: path
+              required: true
+              type: integer
+              description: "ID of the task for which sale orders to return"
+        responses:
+            200:
+              description: "Successful operation"
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/definitions/SaleOrder"
+            401:
+              description: "Unauthorized. Token is invalid or expired."
+            403:
+              description: "Forbidden. User is not assigned to this task."
+            404:
+              description: "Task not found"
+        security:
+        - api_key: []
+
 securityDefinitions:
   api_key:
     type: "apiKey"
@@ -1004,14 +1040,7 @@ definitions:
                 type: string
                 example: "All / Services"
       sale_order:
-        type: object
-        properties:
-          id:
-            type: integer
-            example: 37
-          name:
-            type: string
-            example: "S00037"
+        "$ref": "#/definitions/SaleOrder"
       description:
         type: string
         example: "DescriptionDescriptionDescriptionDescription"
@@ -1282,3 +1311,24 @@ definitions:
       other_arch_elements_price:
         type: number
         example: 0
+
+  SaleOrder:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 37
+      name:
+        type: string
+        example: "S00037"
+      status:
+        type: string
+        example: 'draft'
+      create_date:
+        type: string
+        format: date-time
+        example: "2025-03-07 09:20:55"
+      write_date:
+        type: string
+        format: date-time
+        example: "2025-03-18 09:53:09"
