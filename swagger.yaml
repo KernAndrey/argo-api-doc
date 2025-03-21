@@ -704,6 +704,31 @@ paths:
         security:
         - api_key: []
 
+  /api/v1/estimate_job_rooms:
+    get:
+        tags:
+        - "Services"
+        summary: "Returns all estimate job rooms"
+        description: ""
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        responses:
+            200:
+              description: "Successful operation"
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/definitions/EstimateJobRoom"
+            401:
+              description: "Unauthorized. Token is invalid or expired."
+        security:
+        - api_key: []
+
 securityDefinitions:
   api_key:
     type: "apiKey"
@@ -1087,14 +1112,7 @@ definitions:
       estimate_job_rooms:
         type: array
         items:
-          type: object
-          properties:
-            id:
-              type: integer
-              example: 1
-            name:
-              type: string
-              example: "Kitchen"
+          $ref: "#/definitions/EstimateJobRoom"
       calculator_type:
         type: string
         example: "other"
@@ -1332,3 +1350,13 @@ definitions:
         type: string
         format: date-time
         example: "2025-03-18 09:53:09"
+
+  EstimateJobRoom:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      name:
+        type: string
+        example: "Kitchen"
