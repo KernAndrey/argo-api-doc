@@ -729,6 +729,31 @@ paths:
         security:
         - api_key: []
 
+  /api/v1/products/:
+    get:
+        tags:
+        - "Services"
+        summary: "Returns all products in category 'All / Services' and subcategories"
+        description: ""
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        responses:
+            200:
+              description: "Successful operation"
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/definitions/Product"
+            401:
+              description: "Unauthorized. Token is invalid or expired."
+        security:
+        - api_key: []
+
 securityDefinitions:
   api_key:
     type: "apiKey"
@@ -1041,29 +1066,7 @@ definitions:
         type: string
         example: "New Task - Glass - S00037"
       product:
-        type: object
-        properties:
-          id:
-            type: integer
-            example: 70
-          name:
-            type: string
-            example: "Glass"
-          type:
-            type: string
-            example: "consu"
-          description:
-            type: boolean
-            example: false
-          category:
-            type: object
-            properties:
-              id:
-                type: integer
-                example: 15
-              name:
-                type: string
-                example: "All / Services"
+        $ref: "#/definitions/Product"
       sale_order:
         "$ref": "#/definitions/SaleOrder"
       description:
@@ -1360,3 +1363,28 @@ definitions:
       name:
         type: string
         example: "Kitchen"
+
+  Product:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 70
+      name:
+        type: string
+        example: "Glass"
+      type:
+        type: string
+        example: "consu"
+      description:
+        type: boolean
+        example: false
+      category:
+        type: object
+        properties:
+          id:
+            type: integer
+            example: 15
+          name:
+            type: string
+            example: "All / Services"
