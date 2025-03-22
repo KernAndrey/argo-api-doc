@@ -1544,11 +1544,15 @@ definitions:
       status:
         type: string
         example: "delivered"
-      create_date:
+      date_created_by_twilio:
         type: string
         format: date-time
         example: "2025-03-18 09:53:09"
-      write_date:
+      date_sent_by_twilio:
+        type: string
+        format: date-time
+        example: "2025-03-18 09:53:09"
+      date_updated_by_twilio:
         type: string
         format: date-time
         example: "2025-03-18 09:53:09"
