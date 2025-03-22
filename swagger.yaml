@@ -25,6 +25,8 @@ tags:
     description: "Endpoints for task attachments"
   - name: "Sale Orders"
     description: "Endpoints for sale orders"
+  - name: "SMS"
+    description: "Endpoints for sending SMS"
 schemes:
   - "https"
   - "http"
@@ -789,6 +791,84 @@ paths:
           description: "Sale order not found"
       security:
         - api_key: [ ]
+
+  /api/v1/customer/<int:customer_id>/send_sms/:
+    post:
+      tags:
+        - "Customers"
+        - "SMS"
+      summary: "Send SMS to the customer"
+      description: ""
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the customer to send SMS to"
+        - in: body
+          name: body
+          description: "SMS object that needs to be sent"
+          required: true
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Hello, this is a test message."
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: string
+                example: "SMS sent successfully."
+        400:
+          description: "Bad request. Invalid input."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        404:
+          description: "Customer not found"
+      security:
+        - api_key: []
+
+  /api/v1/task/<int:task_id>/send_on_my_way_sms/:
+    post:
+      tags:
+        - "Tasks"
+        - "SMS"
+      summary: "Send 'On My Way' SMS to the customer"
+      description: ""
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the task to send SMS for"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: string
+                example: "SMS sent successfully."
+        400:
+          description: "Bad request. Invalid input."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        404:
+          description: "Task not found"
 
 securityDefinitions:
   api_key:
