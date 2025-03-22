@@ -823,11 +823,7 @@ paths:
         200:
           description: "Successful operation"
           schema:
-            type: object
-            properties:
-              data:
-                type: string
-                example: "SMS sent successfully."
+            $ref: "#/definitions/SMSDetails"
         400:
           description: "Bad request. Invalid input."
         401:
@@ -842,7 +838,7 @@ paths:
       tags:
         - "Tasks"
         - "SMS"
-      summary: "Send 'On My Way' SMS to the customer"
+      summary: "Send SMS to the customer. Uses 'On My Way' template."
       description: ""
       consumes:
         - "application/json"
@@ -858,17 +854,39 @@ paths:
         200:
           description: "Successful operation"
           schema:
-            type: object
-            properties:
-              data:
-                type: string
-                example: "SMS sent successfully."
+            $ref: "#/definitions/SMSDetails"
         400:
           description: "Bad request. Invalid input."
         401:
           description: "Unauthorized. Token is invalid or expired."
         404:
           description: "Task not found"
+
+  /api/v1/sms/<int:sms_id>/:
+    get:
+      tags:
+        - "SMS"
+      summary: "Get SMS details (with status) by ID."
+      description: ""
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: sms_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the SMS to return"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/SMSDetails"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        404:
+          description: "SMS not found"
 
 securityDefinitions:
   api_key:
@@ -1504,3 +1522,33 @@ definitions:
           name:
             type: string
             example: "All / Services"
+
+  SMSDetails:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      customer_id:
+        type: integer
+        example: 27
+      sender_number:
+        type: string
+        example: "+1-202-555-0173"
+      receiving_number:
+        type: string
+        example: "+1-202-555-0173"
+      message:
+        type: string
+        example: "Hello, this is a test message."
+      status:
+        type: string
+        example: "delivered"
+      create_date:
+        type: string
+        format: date-time
+        example: "2025-03-18 09:53:09"
+      write_date:
+        type: string
+        format: date-time
+        example: "2025-03-18 09:53:09"
