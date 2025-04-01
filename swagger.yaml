@@ -888,6 +888,70 @@ paths:
         404:
           description: "SMS not found"
 
+  /api/v1/task/<int:task_id>/start_working/:
+    post:
+      tags:
+        - Tasks
+      summary: "Create a log for the start of work on the task"
+      description: ""
+      consumes:
+          - "application/json"
+      produces:
+          - "application/json"
+      parameters:
+          - name: task_id
+            in: path
+            required: true
+            type: integer
+            description: "ID of the task to start working on"
+      responses:
+          200:
+              description: "Successful operation"
+              schema:
+                  type: object
+                  properties:
+                      data:
+                          type: string
+                          example: "Message logged successfully."
+          401:
+              description: "Unauthorized. Token is invalid or expired."
+          403:
+              description: "Forbidden. User is not assigned to this task."
+          404:
+              description: "Task not found"
+
+  /api/v1/task/<int:task_id>/finish_working/:
+    post:
+      tags:
+        - Tasks
+      summary: "Create a log for the finish of work on the task"
+      description: ""
+      consumes:
+          - "application/json"
+      produces:
+          - "application/json"
+      parameters:
+          - name: task_id
+            in: path
+            required: true
+            type: integer
+            description: "ID of the task to finish working on"
+      responses:
+          200:
+              description: "Successful operation"
+              schema:
+                  type: object
+                  properties:
+                      data:
+                          type: string
+                          example: "Message logged successfully."
+          401:
+              description: "Unauthorized. Token is invalid or expired."
+          403:
+              description: "Forbidden. User is not assigned to this task."
+          404:
+              description: "Task not found"
+
 securityDefinitions:
   api_key:
     type: "apiKey"
