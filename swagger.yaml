@@ -27,6 +27,8 @@ tags:
     description: "Endpoints for sale orders"
   - name: "SMS"
     description: "Endpoints for sending SMS"
+  - name: "Locations"
+    description: "Endpoints for posting locations"
 schemes:
   - "https"
   - "http"
@@ -951,6 +953,44 @@ paths:
               description: "Forbidden. User is not assigned to this task."
           404:
               description: "Task not found"
+
+  /api/v1/post_location/:
+    post:
+      tags:
+        - Locations
+      summary: "Post location of the user"
+      description: ""
+      consumes:
+          - "application/json"
+      produces:
+          - "application/json"
+      parameters:
+          - in: body
+            name: body
+            description: "Location object that needs to be posted"
+            required: true
+            schema:
+                type: object
+                properties:
+                    latitude:
+                        type: number
+                        example: 37.7749
+                    longitude:
+                        type: number
+                        example: -122.4194
+      responses:
+          200:
+              description: "Successful operation"
+              schema:
+                  type: object
+                  properties:
+                      data:
+                          type: string
+                          example: "Location posted successfully."
+          401:
+              description: "Unauthorized. Token is invalid or expired."
+          403:
+              description: "Forbidden. User is not assigned to this task."
 
 securityDefinitions:
   api_key:
