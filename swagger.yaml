@@ -53,7 +53,7 @@ paths:
               data:
                 type: array
                 items:
-                  $ref: "#/definitions/TaskShort"
+                  $ref: "#/definitions/TaskDetails"
         401:
           description: "Unauthorized. Token is invalid or expired."
       security:
