@@ -212,6 +212,70 @@ paths:
       security:
         - api_key: [ ]
 
+  /api/v1/customer/:
+    post:
+      tags:
+        - "Customers"
+      summary: "Create a new customer"
+      description: ""
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: body
+          name: body
+          description: "Customer object that needs to be updated. All fields are optional, but at least one field must be provided."
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Brandon Freeman"
+              phone:
+                type: string
+                example: "+1-202-555-0173"
+              mobile:
+                type: string
+                example: "+1-202-555-0173"
+              email:
+                type: string
+                example: "name@domain.com"
+              street:
+                type: string
+                example: "4557 De Silva St"
+              street2:
+                type: string
+                example: "Apt 123"
+              city:
+                type: string
+                example: "Fremont"
+              zip:
+                type: string
+                example: "94538"
+              state_id:
+                type: integer
+                example: 1
+              country_id:
+                type: integer
+                example: 1
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: string
+                example: "Customer updated successfully."
+        400:
+          description: "Bad request. Invalid input."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+      security:
+        - api_key: [ ]
+
   /api/v1/customer/<int:customer_id>:
     get:
       tags:
