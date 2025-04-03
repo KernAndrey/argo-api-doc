@@ -92,6 +92,45 @@ paths:
       security:
         - api_key: [ ]
 
+  /api/v1/task/:
+    post:
+      tags:
+          - "Tasks"
+      summary: "Create a new task"
+      description: ""
+      consumes:
+          - "application/json"
+      produces:
+          - "application/json"
+      parameters:
+          - in: body
+            name: body
+            description: "Task object that needs to be added"
+            required: true
+            schema:
+                type: object
+                properties:
+                  customer_id:
+                      type: integer
+                      example: 27
+                  lead_source_id:
+                      type: integer
+                      example: 2
+      responses:
+          201:
+            description: "Successful operation"
+            schema:
+                type: object
+                properties:
+                  data:
+                      $ref: "#/definitions/TaskDetails"
+          400:
+            description: "Bad request. Invalid input."
+          401:
+            description: "Unauthorized. Token is invalid or expired."
+      security:
+          - api_key: [ ]
+
   /api/v1/task/<int:task_id>/set-mechanism-status:
     put:
       tags:
@@ -449,6 +488,38 @@ paths:
           description: "Unauthorized. Token is invalid or expired."
         404:
           description: "Country not found"
+      security:
+        - api_key: [ ]
+
+  /api/v1/lead_sources/:
+    get:
+      tags:
+        - "Tasks"
+      summary: "Returns all lead sources"
+      description: ""
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    name:
+                      type: string
+                      example: "Website"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
       security:
         - api_key: [ ]
 
@@ -1118,6 +1189,9 @@ definitions:
       status:
         type: string
         example: "New"
+      lead_source:
+        type: string
+        example: "Website"
       assignees:
         type: array
         items:
