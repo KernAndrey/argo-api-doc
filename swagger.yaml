@@ -15,6 +15,8 @@ basePath: "/v2"
 tags:
   - name: "Tasks"
     description: "Endpoints for project tasks"
+  - name: "Office Tasks"
+    description: "Endpoints for office tasks"
   - name: "Services"
     description: "Endpoints for task services (jobs)"
   - name: "Customers"
@@ -1127,6 +1129,123 @@ paths:
           403:
               description: "Forbidden. User is not assigned to this task."
 
+  /api/v1/office_tasks/:
+    get:
+      tags:
+        - "Office Tasks"
+      summary: "Returns all office tasks where user is set as employee"
+      description: ""
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                    $ref: "#/definitions/OfficeTask"
+        400:
+            description: "Bad request. Invalid input."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+      security:
+        - api_key: [ ]
+
+  /api/v1/office_task/:
+    post:
+        tags:
+            - "Office Tasks"
+        summary: "Create a new office task"
+        description: ""
+        consumes:
+            - "application/json"
+        produces:
+            - "application/json"
+        parameters:
+          - in: body
+            name: body
+            description: "Office task object that needs to be added"
+            required: true
+            schema:
+              type: object
+              properties:
+                task_id:
+                    type: integer
+                    example: 2
+                description:
+                    type: string
+                    example: "Description of the task"
+                date_deadline:
+                    type: string
+                    format: date-time
+                    example: "2025-04-10 17:00:00"
+        responses:
+            201:
+              description: "Successful operation"
+              schema:
+                  type: object
+                  properties:
+                    data:
+                      $ref: "#/definitions/OfficeTask"
+            400:
+              description: "Bad request. Invalid input."
+            401:
+              description: "Unauthorized. Token is invalid or expired."
+        security:
+            - api_key: [ ]
+
+  /api/v1/office_task/<int:office_task_id>/attachment/:
+    post:
+        tags:
+            - "Office Tasks"
+            - "Attachments"
+        summary: "Upload an attachment for the office task"
+        description: ""
+        consumes:
+            - "application/json"
+        produces:
+            - "application/json"
+        parameters:
+          - name: office_task_id
+            in: path
+            required: true
+            type: integer
+            description: "ID of the office task to which the attachment belongs"
+          - in: body
+            name: body
+            description: "Attachment object that needs to be added"
+            required: true
+            schema:
+              type: object
+              properties:
+                name:
+                    type: string
+                    example: "document.pdf"
+                data_base64:
+                    type: string
+                    example: "JVBERi0xLjQKJeLjz9MKNCAwIG9iago8PC9UeXBlL1hSZW5kZXIvUGFnZXMvUGFnZVsvNjYv..."
+        responses:
+            201:
+              description: "Successful operation"
+              schema:
+                  type: object
+                  properties:
+                      data:
+                          $ref: "#/definitions/Attachment"
+            400:
+              description: "Bad request. Invalid input."
+            401:
+              description: "Unauthorized. Token is invalid or expired."
+            404:
+              description: "Office task not found"
+        security:
+            - api_key: [ ]
+
 securityDefinitions:
   api_key:
     type: "apiKey"
@@ -1798,3 +1917,23 @@ definitions:
         type: string
         format: date-time
         example: "2025-03-18 09:53:09"
+
+  OfficeTask:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 62
+      task_id:
+        type: integer
+        example: 2
+      description:
+        type: string
+        example: "Description of the task"
+      date_deadline:
+        type: string
+        example: "2025-04-10 17:00:00"
+      attachments:
+        type: array
+        items:
+          $ref: "#/definitions/Attachment"
