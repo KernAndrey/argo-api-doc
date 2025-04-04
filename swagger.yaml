@@ -253,6 +253,47 @@ paths:
       security:
         - api_key: [ ]
 
+  /api/v1/service/<int:service_id>/:
+    put:
+        tags:
+            - "Services"
+        summary: "Update service details by ID"
+        description: ""
+        consumes:
+            - "application/json"
+        produces:
+            - "application/json"
+        parameters:
+            - name: service_id
+              in: path
+              required: true
+              type: integer
+              description: "ID of the service to update"
+            - in: body
+              name: body
+              description: "Service object that needs to be updated"
+              required: true
+              schema:
+                  $ref: "#/definitions/ServicePost"
+        responses:
+            200:
+              description: "Successful operation"
+              schema:
+                  type: object
+                  properties:
+                    data:
+                        $ref: "#/definitions/ServiceDetails"
+            400:
+              description: "Bad request. Invalid input."
+            401:
+              description: "Unauthorized. Token is invalid or expired."
+            403:
+              description: "Forbidden. User is not assigned to this task."
+            404:
+              description: "Service not found"
+        security:
+            - api_key: [ ]
+
   /api/v1/customer/:
     post:
       tags:
@@ -1607,6 +1648,12 @@ definitions:
       wrong_measurements:
         type: boolean
         example: false
+      service_call:
+        type: boolean
+        example: false
+      service_call_fixed:
+        type: boolean
+        example: false
       estimate_job_rooms:
         type: array
         items:
@@ -1714,7 +1761,7 @@ definitions:
   ServicePost:
     type: object
     properties:
-      product_id:
+      product_tmp_id:
         type: integer
         example: 7
       sale_order_id:
@@ -1736,6 +1783,9 @@ definitions:
         type: number
         example: 0
       wrong_measurements:
+        type: boolean
+        example: false
+      service_call_fixed:
         type: boolean
         example: false
       estimate_job_room_ids:
