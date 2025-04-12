@@ -1287,6 +1287,41 @@ paths:
         security:
             - api_key: [ ]
 
+  /api/v1/task/<int:task_id>/planned_dates/:
+    get:
+      tags:
+        - "Tasks"
+      summary: "Returns all planned dates for the task"
+      description: ""
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the task for which to return planned dates"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "#/definitions/PlannedDate"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. User is not assigned to this task."
+        404:
+          description: "Task not found"
+      security:
+        - api_key: [ ]
+
 securityDefinitions:
   api_key:
     type: "apiKey"
@@ -1987,3 +2022,32 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Attachment"
+
+  PlannedDate:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      planned_date_begin:
+        type: string
+        format: date-time
+        example: "2025-04-10 17:00:00"
+      date_deadline:
+        type: string
+        format: date-time
+        example: "2025-04-10 17:00:00"
+      task_stage:
+        type: string
+        example: "New"
+      created_by:
+        type: string
+        example: "Mitchell Admin"
+      create_date:
+        type: string
+        format: date-time
+        example: "2025-03-18 09:53:09"
+      write_date:
+        type: string
+        format: date-time
+        example: "2025-03-18 09:53:09"
