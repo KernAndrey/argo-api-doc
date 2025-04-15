@@ -1683,6 +1683,12 @@ definitions:
       wrong_measurements:
         type: boolean
         example: false
+      wrong_measurements_note:
+        type: string
+        example: "Note"
+      remeasured:
+        type: boolean
+        example: false
       service_call:
         type: boolean
         example: false
@@ -1818,6 +1824,12 @@ definitions:
         type: number
         example: 0
       wrong_measurements:
+        type: boolean
+        example: false
+      wrong_measurements_note:
+        type: string
+        example: "Note"
+      remeasured:
         type: boolean
         example: false
       service_call_fixed:
