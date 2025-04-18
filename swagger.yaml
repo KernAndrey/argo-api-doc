@@ -31,6 +31,8 @@ tags:
     description: "Endpoints for sending SMS"
   - name: "Locations"
     description: "Endpoints for posting locations"
+  - name: "Emails"
+    description: "Endpoints for sending emails"
 schemes:
   - "https"
   - "http"
@@ -1322,6 +1324,77 @@ paths:
       security:
         - api_key: [ ]
 
+  /api/v1/sale_order/<int:sale_order_id>/email_template/:
+    post:
+      tags:
+        - "Emails"
+        - "Sale Orders"
+      summary: "Create and returns email template object for the sale order by ID."
+      description: "Returns email template object for the sale order by ID. To send the email use /api/v1/mail_compose/<int:mail_compose_id>/send/"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: sale_order_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the sale order to return email template for"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/MailCompose"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. User is not assigned to this sale order."
+        404:
+          description: "Sale order not found"
+
+  /api/v1/mail_compose/<int:mail_compose_id>/send/:
+    post:
+      tags:
+        - "Emails"
+      summary: "Send email using the email template by ID."
+      description: "Send email using the email template by ID. You can change default subject, body and email_from fields."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: mail_compose_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the email template to send"
+        - in: body
+          name: body
+          description: "Privide email_from, subject and body fields to change default values."
+          required: true
+          schema:
+            type: object
+            properties:
+              subject:
+                type: string
+                example: "My Company (San Francisco) Order (Ref S00051)"
+              body:
+                type: string
+                example: "<div>...</div>"
+              email_from:
+                type: string
+                example: "Abigail Peterson <abigail.peterson39@example.com>"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/MailCompose"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        404:
+          description: "Mail compose not found"
+
 securityDefinitions:
   api_key:
     type: "apiKey"
@@ -2063,3 +2136,23 @@ definitions:
         type: string
         format: date-time
         example: "2025-03-18 09:53:09"
+
+  MailCompose:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      subject:
+        type: string
+        example: "Test Subject"
+      body:
+        type: string
+        example: "This is a test email body."
+      email_from:
+        type: string
+        example: Abigail Peterson <abigail.peterson39@example.com>
+      attachments:
+        type: array
+        items:
+          $ref: "#/definitions/Attachment"
