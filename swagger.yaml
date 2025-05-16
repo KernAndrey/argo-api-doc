@@ -22,7 +22,7 @@ tags:
   - name: "Customers"
     description: "Endpoints for customers"
   - name: "Notes"
-    description: "Access to Petstore orders"
+    description: "Endpoints for task notes"
   - name: "Attachments"
     description: "Endpoints for task attachments"
   - name: "Sale Orders"
@@ -63,7 +63,7 @@ paths:
       security:
         - api_key: [ ]
 
-  /api/v1/tasks/<int:task_id>:
+  /api/v1/task/<int:task_id>:
     get:
       tags:
         - "Tasks"
@@ -114,7 +114,7 @@ paths:
             schema:
                 type: object
                 properties:
-                  customer_id:
+                  partner_id:
                       type: integer
                       example: 27
                   lead_source_id:
@@ -177,7 +177,7 @@ paths:
           description: "Task not found"
 
 
-  /api/v1/tasks/<int:task_id>/services:
+  /api/v1/task/<int:task_id>/services/:
     get:
       tags:
         - "Tasks"
@@ -345,14 +345,14 @@ paths:
                 type: integer
                 example: 1
       responses:
-        200:
-          description: "Successful operation"
+        201:
+          description: "Successful operation. Customer created."
           schema:
             type: object
             properties:
               data:
                 type: string
-                example: "Customer updated successfully."
+                example: "Customer created successfully."
         400:
           description: "Bad request. Invalid input."
         401:
@@ -1454,6 +1454,9 @@ definitions:
           phone:
             type: string
             example: "N/A"
+          mobile:
+            type: string
+            example: "+1-202-555-0173"
       status:
         type: string
         example: "New"
@@ -1529,6 +1532,23 @@ definitions:
           woodwork:
             type: string
             example: "picked_up_from_manufacturer"
+          screen:
+            type: string
+            example: "n/a"
+          sash:
+            type: string
+            example: "n/a"
+      quotation_status:
+        type: string
+        example: "pending"
+      create_date:
+        type: string
+        format: date-time
+        example: "2024-07-15 10:00:00"
+      write_date:
+        type: string
+        format: date-time
+        example: "2024-07-15 10:00:00"
 
   CustomerDetails:
     type: object
@@ -1696,6 +1716,10 @@ definitions:
         type: boolean
         example: true
       create_date:
+        type: string
+        format: date-time
+        example: "2025-02-10 09:30:26"
+      write_date:
         type: string
         format: date-time
         example: "2025-02-10 09:30:26"
@@ -1925,9 +1949,15 @@ definitions:
       standard_door_dimensions:
         type: boolean
         example: false
+      custom_width:
+        type: number
+        example: 10
       custom_width_fraction:
         type: string
         example: '1-1/2, 1 1/2'
+      custom_height:
+        type: number
+        example: 10
       custom_height_fraction:
         type: string
         example: '1-1/2, 1 1/2'
