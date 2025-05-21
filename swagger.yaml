@@ -1792,6 +1792,9 @@ definitions:
       service_call_fixed:
         type: boolean
         example: false
+      done:
+        type: boolean
+        example: false
       estimate_job_rooms:
         type: array
         items:
@@ -1930,6 +1933,9 @@ definitions:
         type: boolean
         example: false
       service_call_fixed:
+        type: boolean
+        example: false
+      done:
         type: boolean
         example: false
       estimate_job_room_ids:
