@@ -1818,14 +1818,14 @@ definitions:
         type: number
         example: 0
       custom_width_fraction:
-        type: boolean
-        example: false
+        type: string
+        example: '1-1/2, 1 1/2'
       custom_height:
         type: number
         example: 0
       custom_height_fraction:
-        type: boolean
-        example: false
+        type: string
+        example: '1-1/2, 1 1/2'
       need_to_remeasure:
         type: boolean
         example: false
