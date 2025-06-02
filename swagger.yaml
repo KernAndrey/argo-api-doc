@@ -10,8 +10,8 @@ info:
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-host: ""
-basePath: "/v2"
+host: "odoodev.vaskotech.com"
+basePath: ""
 tags:
   - name: "Tasks"
     description: "Endpoints for project tasks"
@@ -42,12 +42,33 @@ paths:
     get:
       tags:
         - "Tasks"
-      summary: "Returns all active tasks  where user is estimator or technician"
-      description: ""
+      summary: "Returns filtered list of assigned tasks with date filtering, timezone support and search capabilities"
+      description: "Returns tasks assigned to the authenticated employee (estimator or technician) with optional date filtering (with timezone support) and customer search. Returns tasks for today by default if no parameters provided."
       consumes:
         - "application/json"
       produces:
         - "application/json"
+      parameters:
+        - name: date
+          in: query
+          required: false
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          description: "Filter tasks by date in YYYY-MM-DD format. Defaults to today's date if not provided and no search query is given. Date is interpreted in the specified timezone or UTC if no timezone provided."
+          example: "2025-01-20"
+        - name: q
+          in: query
+          required: false
+          type: string
+          description: "Search query to filter tasks by customer name or address. Uses partial matching (ILIKE)."
+          example: "John Doe"
+        - name: timezone
+          in: query
+          required: false
+          type: string
+          description: "Timezone for date interpretation. Must be a valid timezone name from the IANA Time Zone Database. If not provided, UTC is used. Examples: 'America/New_York', 'Europe/London', 'Asia/Tokyo'."
+          example: "America/New_York"
       responses:
         200:
           description: "Successful operation"
@@ -57,7 +78,21 @@ paths:
               data:
                 type: array
                 items:
-                  $ref: "#/definitions/TaskDetails"
+                  $ref: "#/definitions/TaskSummary"
+        400:
+          description: "Bad request. Invalid date format or timezone."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                examples:
+                  invalid_date:
+                    summary: "Invalid date format"
+                    value: "Invalid date format. Use YYYY-MM-DD format."
+                  invalid_timezone:
+                    summary: "Invalid timezone"
+                    value: "Invalid timezone: Invalid/Timezone. Please use a valid timezone name (e.g., America/New_York, Europe/London)."
         401:
           description: "Unauthorized. Token is invalid or expired."
       security:
@@ -1402,6 +1437,58 @@ securityDefinitions:
     in: "header"
 
 definitions:
+  TaskSummary:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 123
+      reference_number:
+        type: string
+        example: "FSM-001"
+      name:
+        type: string
+        example: "John Doe, New York"
+      customer:
+        type: object
+        properties:
+          id:
+            type: integer
+            example: 456
+          name:
+            type: string
+            example: "John Doe"
+          address:
+            type: string
+            example: "123 Main St, New York, NY 10001"
+      planned_date_begin:
+        type: string
+        format: date-time
+        example: "2025-01-20 09:00:00"
+        description: "Start date and time of the task. Can be null if not scheduled."
+      date_deadline:
+        type: string
+        format: date-time
+        example: "2025-01-20 11:00:00"
+        description: "End date and time of the task. Can be null if not scheduled."
+      duration_hours:
+        type: number
+        format: float
+        example: 2.0
+        description: "Duration of the task in hours. Calculated from planned_date_begin and date_deadline."
+      status:
+        type: string
+        example: "In Progress"
+        description: "Current status/stage of the task"
+      create_date:
+        type: string
+        format: date-time
+        example: "2025-01-19 15:30:00"
+      write_date:
+        type: string
+        format: date-time
+        example: "2025-01-20 08:45:00"
+
   TaskShort:
     type: object
     properties:
