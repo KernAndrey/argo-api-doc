@@ -10,8 +10,8 @@ info:
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-host: "odoodev.vaskotech.com"
-basePath: ""
+host: ""
+basePath: "/v2"
 tags:
   - name: "Tasks"
     description: "Endpoints for project tasks"
@@ -27,6 +27,8 @@ tags:
     description: "Endpoints for task attachments"
   - name: "Sale Orders"
     description: "Endpoints for sale orders"
+  - name: "Invoices"
+    description: "Endpoints for invoices"
   - name: "SMS"
     description: "Endpoints for sending SMS"
   - name: "Locations"
@@ -1009,6 +1011,123 @@ paths:
       security:
         - api_key: [ ]
 
+  /api/v1/invoice/<int:invoice_id>/portal_url/:
+    get:
+      tags:
+        - "Invoices"
+      summary: "Returns portal URL for the invoice by ID. Customer can use it to view and download the invoice."
+      description: ""
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: invoice_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the invoice to return portal URL for"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: string
+                example: "https://example.com/my/invoices/42?access_token=3acfce93-03dc-4945-9d2f-83dc607dfeb0"
+        400:
+          description: "Bad request. Document is not an invoice."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Document is not an invoice."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. You are not assigned to this task."
+        404:
+          description: "Invoice not found or related sale order not found."
+      security:
+        - api_key: [ ]
+
+  /api/v1/task/<int:task_id>/invoices/:
+    get:
+      tags:
+        - "Tasks"
+        - "Invoices"
+      summary: "Returns all invoices for the task"
+      description: "Returns all invoices related to the task through sale orders. Includes basic invoice information."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the task for which invoices to return"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "#/definitions/Invoice"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. User is not assigned to this task."
+        404:
+          description: "Task not found"
+      security:
+        - api_key: [ ]
+
+  /api/v1/invoice/<int:invoice_id>/email_template/:
+    post:
+      tags:
+        - "Emails"
+        - "Invoices"
+      summary: "Create and returns email template object for the invoice by ID."
+      description: "Returns email template object for the invoice by ID. To send the email use /api/v1/mail_compose/<int:mail_compose_id>/send/"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: invoice_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the invoice to return email template for"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/MailCompose"
+        400:
+          description: "Bad request. Document is not an invoice."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Document is not an invoice."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. User is not assigned to this task."
+        404:
+          description: "Invoice not found or related sale order not found."
+        500:
+          description: "Invoice email template not found."
+
   /api/v1/customer/<int:customer_id>/send_sms/:
     post:
       tags:
@@ -1429,6 +1548,124 @@ paths:
           description: "Unauthorized. Token is invalid or expired."
         404:
           description: "Mail compose not found"
+
+  /api/v1/invoice/<int:invoice_id>/sms_text/:
+    get:
+      tags:
+        - "Invoices"
+        - "SMS"
+      summary: "Returns SMS text with portal URL for the invoice by ID."
+      description: "Returns SMS text with portal URL for the invoice that can be sent using existing SMS endpoints. The text includes customer name, invoice number, company name and portal link."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: invoice_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the invoice to return SMS text for"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  sms_text:
+                    type: string
+                    example: "Hi John Doe, your invoice INV/2025/00001 from ARGO Company is ready. View and download it here: https://example.com/my/invoices/42?access_token=abc123"
+                    description: "Complete SMS text ready to be sent"
+                  portal_url:
+                    type: string
+                    example: "https://example.com/my/invoices/42?access_token=abc123"
+                    description: "Direct portal URL for the invoice"
+                  customer_name:
+                    type: string
+                    example: "John Doe"
+                    description: "Customer name extracted from invoice"
+                  invoice_number:
+                    type: string
+                    example: "INV/2025/00001"
+                    description: "Invoice number"
+                  company_name:
+                    type: string
+                    example: "ARGO Company"
+                    description: "Company name from invoice"
+        400:
+          description: "Bad request. Document is not an invoice."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Document is not an invoice."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. You are not assigned to this task."
+        404:
+          description: "Invoice not found or related sale order not found."
+      security:
+        - api_key: [ ]
+
+  /api/v1/sale_order/<int:sale_order_id>/sms_text/:
+    get:
+      tags:
+        - "Sale Orders"
+        - "SMS"
+      summary: "Returns SMS text with portal URL for the sale order by ID."
+      description: "Returns SMS text with portal URL for the sale order that can be sent using existing SMS endpoints. The text includes customer name, order number, company name and portal link."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: sale_order_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the sale order to return SMS text for"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  sms_text:
+                    type: string
+                    example: "Hi John Doe, your quote S00051 from ARGO Company is ready for review. View, sign and pay here: https://example.com/my/orders/38?access_token=abc123"
+                    description: "Complete SMS text ready to be sent"
+                  portal_url:
+                    type: string
+                    example: "https://example.com/my/orders/38?access_token=abc123"
+                    description: "Direct portal URL for the sale order"
+                  customer_name:
+                    type: string
+                    example: "John Doe"
+                    description: "Customer name extracted from sale order"
+                  order_number:
+                    type: string
+                    example: "S00051"
+                    description: "Sale order number"
+                  company_name:
+                    type: string
+                    example: "ARGO Company"
+                    description: "Company name from sale order"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. You are not assigned to this task."
+        404:
+          description: "Sale order not found."
+      security:
+        - api_key: [ ]
 
 securityDefinitions:
   api_key:
@@ -2279,3 +2516,52 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Attachment"
+
+  Invoice:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 42
+      name:
+        type: string
+        example: "INV/2025/00001"
+      invoice_origin:
+        type: string
+        example: "S00037"
+        description: "Sale order name that generated this invoice"
+      state:
+        type: string
+        example: "posted"
+        description: "Invoice state (draft, posted, paid, cancel)"
+      invoice_date:
+        type: string
+        format: date
+        example: "2025-01-20"
+        description: "Invoice date. Can be null if not set."
+      amount_total:
+        type: number
+        format: float
+        example: 1500.00
+        description: "Total amount of the invoice"
+      amount_residual:
+        type: number
+        format: float
+        example: 750.00
+        description: "Remaining amount to be paid"
+      currency_name:
+        type: string
+        example: "USD"
+        description: "Invoice currency"
+      partner_name:
+        type: string
+        example: "Brandon Freeman"
+        description: "Customer name"
+      move_type:
+        type: string
+        example: "out_invoice"
+        description: "Type of invoice (out_invoice, out_refund, etc.)"
+      payment_state:
+        type: string
+        example: "partial"
+        description: "Payment state (not_paid, partial, paid, overpaid, etc.)"
