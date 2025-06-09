@@ -844,6 +844,60 @@ paths:
       security:
         - api_key: [ ]
 
+  /api/v1/task/note/<int:note_id>/attachment/:
+    post:
+      tags:
+        - "Notes"
+        - "Attachments"
+      summary: "Upload an attachment for a task note"
+      description: "Creates an attachment and associates it with a specific task note. The employee must be assigned to the task (as estimator or technician) to upload attachments."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: note_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the task note to which the attachment will be added"
+        - in: body
+          name: body
+          description: "Attachment object that needs to be added"
+          required: true
+          schema:
+            type: object
+            required:
+              - name
+              - data_base64
+            properties:
+              name:
+                type: string
+                description: "File name with extension"
+                example: "photo.jpg"
+              data_base64:
+                type: string
+                description: "Base64 encoded file content"
+                example: "JVBERi0xLjQKJeLjz9MKNCAwIG9iago8PC9UeXBlL1hSZW5kZXIvUGFnZXMvUGFnZVsvNjYv..."
+      responses:
+        201:
+          description: "Attachment created successfully"
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/Attachment"
+        400:
+          description: "Bad request. Missing required fields (name or data_base64)."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. You are not assigned to this task."
+        404:
+          description: "Task note not found."
+      security:
+        - api_key: [ ]
+
   /api/v1/customer/<int:customer_id>/attachment/:
     post:
       tags:
