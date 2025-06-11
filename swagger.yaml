@@ -982,6 +982,193 @@ paths:
       security:
         - api_key: [ ]
 
+  /api/v1/task/<int:task_id>/sale_order/:
+    post:
+      tags:
+        - "Tasks"
+        - "Sale Orders"
+      summary: "Create a new sale order for a specific task"
+      description: "Creates a new sale order (quotation) for the specified task. The task must have a customer assigned."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the task for which to create a sale order"
+        - name: body
+          in: body
+          required: false
+          description: "Optional sale order details"
+          schema:
+            type: object
+            properties:
+              note:
+                type: string
+                description: "Notes for the sale order"
+                example: "Customer requested expedited delivery"
+              validity_date:
+                type: string
+                format: date
+                description: "Validity date for the quotation in YYYY-MM-DD format"
+                example: "2025-02-15"
+              payment_term_id:
+                type: integer
+                description: "Payment term ID"
+                example: 1
+              pricelist_id:
+                type: integer
+                description: "Pricelist ID"
+                example: 1
+      responses:
+        201:
+          description: "Sale order created successfully"
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/SaleOrder"
+        400:
+          description: "Bad request. Task must have a customer assigned."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Task must have a customer assigned to create a sale order."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. User is not assigned to this task."
+        404:
+          description: "Task not found"
+        500:
+          description: "Internal server error. Failed to create sale order."
+      security:
+        - api_key: [ ]
+
+  /api/v1/sale_order/<int:sale_order_id>/:
+    get:
+      tags:
+        - "Sale Orders"
+      summary: "Get detailed information about a specific sale order"
+      description: "Returns detailed information about a sale order including order lines, amounts, and related data."
+      produces:
+        - "application/json"
+      parameters:
+        - name: sale_order_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the sale order to retrieve"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/SaleOrderDetailed"
+        400:
+          description: "Bad request. Sale order is not associated with a task."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. User is not assigned to this task."
+        404:
+          description: "Sale order not found"
+      security:
+        - api_key: [ ]
+    put:
+      tags:
+        - "Sale Orders"
+      summary: "Update an existing sale order"
+      description: "Updates an existing sale order. Only draft and sent orders can be modified."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: sale_order_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the sale order to update"
+        - name: body
+          in: body
+          required: true
+          description: "Sale order update data"
+          schema:
+            type: object
+            properties:
+              partner_id:
+                type: integer
+                description: "Customer ID"
+                example: 123
+              note:
+                type: string
+                description: "Notes for the sale order"
+                example: "Updated delivery instructions"
+              validity_date:
+                type: string
+                format: date
+                description: "Validity date for the quotation in YYYY-MM-DD format"
+                example: "2025-02-15"
+              payment_term_id:
+                type: integer
+                description: "Payment term ID"
+                example: 1
+              pricelist_id:
+                type: integer
+                description: "Pricelist ID"
+                example: 1
+              user_id:
+                type: integer
+                description: "Salesperson user ID"
+                example: 1
+              team_id:
+                type: integer
+                description: "Sales team ID"
+                example: 1
+      responses:
+        200:
+          description: "Sale order updated successfully"
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/SaleOrder"
+        400:
+          description: "Bad request. Invalid data or sale order cannot be modified."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                examples:
+                  no_data:
+                    summary: "No data provided"
+                    value: "No data provided for update."
+                  invalid_state:
+                    summary: "Invalid state"
+                    value: "Cannot modify sale order in sale state. Only draft and sent orders can be modified."
+                  invalid_partner:
+                    summary: "Invalid partner"
+                    value: "Invalid partner_id provided."
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. User is not assigned to this task."
+        404:
+          description: "Sale order not found"
+        500:
+          description: "Internal server error. Failed to update sale order."
+      security:
+        - api_key: [ ]
+
   /api/v1/estimate_job_rooms:
     get:
       tags:
@@ -2424,6 +2611,150 @@ definitions:
       status:
         type: string
         example: 'draft'
+      create_date:
+        type: string
+        format: date-time
+        example: "2025-03-07 09:20:55"
+      write_date:
+        type: string
+        format: date-time
+        example: "2025-03-18 09:53:09"
+
+  SaleOrderDetailed:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 37
+      name:
+        type: string
+        example: "S00037"
+      state:
+        type: string
+        example: "draft"
+        description: "State of the sale order (draft, sent, sale, done, cancel)"
+      partner_id:
+        type: integer
+        example: 123
+      partner_name:
+        type: string
+        example: "John Doe"
+      user_id:
+        type: integer
+        example: 1
+        description: "Salesperson user ID"
+      user_name:
+        type: string
+        example: "Administrator"
+        description: "Salesperson name"
+      team_id:
+        type: integer
+        example: 1
+        description: "Sales team ID"
+      team_name:
+        type: string
+        example: "Sales Team"
+      task_id:
+        type: integer
+        example: 456
+      task_name:
+        type: string
+        example: "Window Installation"
+      project_id:
+        type: integer
+        example: 789
+      project_name:
+        type: string
+        example: "Field Service"
+      origin:
+        type: string
+        example: "Field Service - Window Installation"
+      note:
+        type: string
+        example: "Customer requested expedited delivery"
+      validity_date:
+        type: string
+        format: date
+        example: "2025-02-15"
+        description: "Validity date of the quotation"
+      date_order:
+        type: string
+        format: date-time
+        example: "2025-01-20 10:30:00"
+      amount_untaxed:
+        type: number
+        format: float
+        example: 1000.00
+      amount_tax:
+        type: number
+        format: float
+        example: 100.00
+      amount_total:
+        type: number
+        format: float
+        example: 1100.00
+      currency_id:
+        type: integer
+        example: 1
+      currency_name:
+        type: string
+        example: "USD"
+      invoice_status:
+        type: string
+        example: "to invoice"
+        description: "Invoice status (no, to invoice, invoiced, upselling)"
+      invoice_count:
+        type: integer
+        example: 0
+      pricelist_id:
+        type: integer
+        example: 1
+      pricelist_name:
+        type: string
+        example: "Public Pricelist"
+      payment_term_id:
+        type: integer
+        example: 1
+      payment_term_name:
+        type: string
+        example: "Immediate Payment"
+      order_line:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 123
+            product_id:
+              type: integer
+              example: 456
+            product_name:
+              type: string
+              example: "Double Hung Window"
+            product_uom_qty:
+              type: number
+              format: float
+              example: 2.0
+            price_unit:
+              type: number
+              format: float
+              example: 500.00
+            discount:
+              type: number
+              format: float
+              example: 10.0
+            price_subtotal:
+              type: number
+              format: float
+              example: 900.00
+            price_total:
+              type: number
+              format: float
+              example: 990.00
+            name:
+              type: string
+              example: "Double Hung Window 24\"x36\""
       create_date:
         type: string
         format: date-time
