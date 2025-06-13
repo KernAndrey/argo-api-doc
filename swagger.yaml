@@ -35,6 +35,8 @@ tags:
     description: "Endpoints for posting locations"
   - name: "Emails"
     description: "Endpoints for sending emails"
+  - name: "Gantt"
+    description: "Endpoints for Gantt chart functionality"
 schemes:
   - "https"
   - "http"
@@ -45,7 +47,7 @@ paths:
       tags:
         - "Tasks"
       summary: "Returns filtered list of assigned tasks with date filtering, timezone support and search capabilities"
-      description: "Returns tasks assigned to the authenticated employee (estimator or technician) with optional date filtering (with timezone support) and customer search. Returns tasks for today by default if no parameters provided."
+      description: "Returns tasks assigned to the authenticated employee (estimator or technician) with optional date filtering (with timezone support) and customer search. Date filtering matches tasks with either estimate dates (planned_date_begin/date_deadline) OR tech job dates (tech_date_begin/tech_date_deadline) in the specified range. Returns tasks for today by default if no parameters provided."
       consumes:
         - "application/json"
       produces:
@@ -57,7 +59,7 @@ paths:
           type: string
           format: date
           pattern: '^\d{4}-\d{2}-\d{2}$'
-          description: "Filter tasks by date in YYYY-MM-DD format. Defaults to today's date if not provided and no search query is given. Date is interpreted in the specified timezone or UTC if no timezone provided."
+          description: "Filter tasks by date in YYYY-MM-DD format. Matches tasks with either estimate dates OR tech job dates in the specified range. Defaults to today's date if not provided and no search query is given. Date is interpreted in the specified timezone or UTC if no timezone provided."
           example: "2025-01-20"
         - name: q
           in: query
@@ -1908,11 +1910,795 @@ paths:
       security:
         - api_key: [ ]
 
+  /api/gantt/employees:
+    get:
+      tags:
+        - "Gantt"
+      summary: "Get employees list for Gantt chart"
+      description: "Returns all employees from user companies with their basic information and display settings for Gantt chart"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              data:
+                type: array
+                items:
+                  $ref: "#/definitions/GanttEmployee"
+        401:
+          description: "Unauthorized. Invalid or missing access token."
+          schema:
+            $ref: "#/definitions/GanttError"
+        403:
+          description: "Forbidden. User does not have FSM access."
+          schema:
+            $ref: "#/definitions/GanttError"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/GanttError"
+      security:
+        - gantt_token: []
+
+  /api/gantt/tasks:
+    get:
+      tags:
+        - "Gantt"
+      summary: "Get tasks for Gantt chart"
+      description: "Returns project tasks and secondary tasks for specified date range and employees. Supports filtering by employee, partner, and including archived tasks."
+      produces:
+        - "application/json"
+      parameters:
+        - name: date_from
+          in: query
+          required: true
+          type: string
+          format: date-time
+          description: "Start date for task filtering (ISO format)"
+          example: "2025-01-20T00:00:00"
+        - name: date_to
+          in: query
+          required: true
+          type: string
+          format: date-time
+          description: "End date for task filtering (ISO format)"
+          example: "2025-01-27T23:59:59"
+        - name: employee_ids
+          in: query
+          required: false
+          type: array
+          items:
+            type: integer
+          description: "Array of employee IDs to filter tasks"
+          example: [1, 2, 3]
+        - name: partner_id
+          in: query
+          required: false
+          type: integer
+          description: "Partner ID to filter tasks by customer"
+          example: 123
+        - name: include_archived
+          in: query
+          required: false
+          type: boolean
+          description: "Include archived tasks in results"
+          example: false
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              data:
+                type: object
+                properties:
+                  project_tasks:
+                    type: array
+                    items:
+                      $ref: "#/definitions/GanttProjectTask"
+                  secondary_tasks:
+                    type: array
+                    items:
+                      $ref: "#/definitions/GanttSecondaryTask"
+        400:
+          description: "Bad request. Missing required date parameters."
+          schema:
+            $ref: "#/definitions/GanttError"
+        401:
+          description: "Unauthorized. Invalid or missing access token."
+          schema:
+            $ref: "#/definitions/GanttError"
+        403:
+          description: "Forbidden. User does not have FSM access."
+          schema:
+            $ref: "#/definitions/GanttError"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/GanttError"
+      security:
+        - gantt_token: []
+    post:
+      tags:
+        - "Gantt"
+      summary: "Create new project task"
+      description: "Creates a new project task and assigns employee as estimator or technician based on task type. Checks for time overlaps."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: body
+          name: body
+          description: "Task creation data"
+          required: true
+          schema:
+            $ref: "#/definitions/GanttTaskCreate"
+      responses:
+        200:
+          description: "Task created successfully"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              data:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 123
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+                    example: ["Time overlap detected with task #456"]
+                  overlap_details:
+                    $ref: "#/definitions/GanttOverlapDetails"
+        400:
+          description: "Bad request. Missing required fields or invalid data."
+          schema:
+            $ref: "#/definitions/GanttError"
+        401:
+          description: "Unauthorized. Invalid or missing access token."
+          schema:
+            $ref: "#/definitions/GanttError"
+        403:
+          description: "Forbidden. User does not have FSM access."
+          schema:
+            $ref: "#/definitions/GanttError"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/GanttError"
+      security:
+        - gantt_token: []
+
+  /api/gantt/tasks/{task_id}:
+    put:
+      tags:
+        - "Gantt"
+      summary: "Update project task"
+      description: "Updates project task (drag & drop functionality). Updates employee assignment and datetime based on task stage (estimate or tech schedule)."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the task to update"
+        - in: body
+          name: body
+          description: "Task update data"
+          required: true
+          schema:
+            $ref: "#/definitions/GanttTaskUpdate"
+      responses:
+        200:
+          description: "Task updated successfully"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              data:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 123
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+                    example: []
+                  overlap_details:
+                    $ref: "#/definitions/GanttOverlapDetails"
+        400:
+          description: "Bad request. Invalid dates or data."
+          schema:
+            $ref: "#/definitions/GanttError"
+        401:
+          description: "Unauthorized. Invalid or missing access token."
+          schema:
+            $ref: "#/definitions/GanttError"
+        403:
+          description: "Forbidden. User does not have FSM access."
+          schema:
+            $ref: "#/definitions/GanttError"
+        404:
+          description: "Task not found"
+          schema:
+            $ref: "#/definitions/GanttError"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/GanttError"
+      security:
+        - gantt_token: []
+    delete:
+      tags:
+        - "Gantt"
+      summary: "Delete project task"
+      description: "Deletes a project task. Task must be archived first before deletion."
+      produces:
+        - "application/json"
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the task to delete"
+      responses:
+        200:
+          description: "Task deleted successfully"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              message:
+                type: string
+                example: "Task deleted successfully"
+        401:
+          description: "Unauthorized. Invalid or missing access token."
+          schema:
+            $ref: "#/definitions/GanttError"
+        403:
+          description: "Forbidden. User does not have FSM access."
+          schema:
+            $ref: "#/definitions/GanttError"
+        404:
+          description: "Task not found"
+          schema:
+            $ref: "#/definitions/GanttError"
+        409:
+          description: "Conflict. Task must be archived before deletion."
+          schema:
+            $ref: "#/definitions/GanttError"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/GanttError"
+      security:
+        - gantt_token: []
+
+  /api/gantt/customers:
+    get:
+      tags:
+        - "Gantt"
+      summary: "Search customers"
+      description: "Search for customers by name, address, city, or phone. Returns up to 20 results. Can also return a suggested customer."
+      produces:
+        - "application/json"
+      parameters:
+        - name: search
+          in: query
+          required: false
+          type: string
+          description: "Search query (minimum 2 characters if no suggested_customer_id)"
+          example: "John"
+        - name: suggested_customer_id
+          in: query
+          required: false
+          type: integer
+          description: "ID of suggested customer to include in results"
+          example: 123
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              data:
+                type: object
+                properties:
+                  customers:
+                    type: array
+                    items:
+                      $ref: "#/definitions/GanttCustomer"
+        400:
+          description: "Bad request. Search query too short."
+          schema:
+            $ref: "#/definitions/GanttError"
+        401:
+          description: "Unauthorized. Invalid or missing access token."
+          schema:
+            $ref: "#/definitions/GanttError"
+        403:
+          description: "Forbidden. User does not have FSM access."
+          schema:
+            $ref: "#/definitions/GanttError"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/GanttError"
+      security:
+        - gantt_token: []
+
+  /api/gantt/secondary-tasks:
+    post:
+      tags:
+        - "Gantt"
+      summary: "Create secondary task"
+      description: "Creates a new secondary task for an employee. Checks for time overlaps with existing tasks."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: body
+          name: body
+          description: "Secondary task creation data"
+          required: true
+          schema:
+            $ref: "#/definitions/GanttSecondaryTaskCreate"
+      responses:
+        200:
+          description: "Secondary task created successfully"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              data:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 456
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+                    example: []
+                  overlap_details:
+                    $ref: "#/definitions/GanttOverlapDetails"
+        400:
+          description: "Bad request. Missing required fields or invalid data."
+          schema:
+            $ref: "#/definitions/GanttError"
+        401:
+          description: "Unauthorized. Invalid or missing access token."
+          schema:
+            $ref: "#/definitions/GanttError"
+        403:
+          description: "Forbidden. User does not have FSM access."
+          schema:
+            $ref: "#/definitions/GanttError"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/GanttError"
+      security:
+        - gantt_token: []
+
+  /api/gantt/secondary-tasks/{task_id}:
+    put:
+      tags:
+        - "Gantt"
+      summary: "Update secondary task"
+      description: "Updates an existing secondary task. Checks for time overlaps with other tasks."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the secondary task to update"
+        - in: body
+          name: body
+          description: "Secondary task update data"
+          required: true
+          schema:
+            $ref: "#/definitions/GanttSecondaryTaskUpdate"
+      responses:
+        200:
+          description: "Secondary task updated successfully"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              data:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 456
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+                    example: []
+                  overlap_details:
+                    $ref: "#/definitions/GanttOverlapDetails"
+        400:
+          description: "Bad request. Invalid dates or data."
+          schema:
+            $ref: "#/definitions/GanttError"
+        401:
+          description: "Unauthorized. Invalid or missing access token."
+          schema:
+            $ref: "#/definitions/GanttError"
+        403:
+          description: "Forbidden. User does not have FSM access."
+          schema:
+            $ref: "#/definitions/GanttError"
+        404:
+          description: "Secondary task not found"
+          schema:
+            $ref: "#/definitions/GanttError"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/GanttError"
+      security:
+        - gantt_token: []
+    delete:
+      tags:
+        - "Gantt"
+      summary: "Delete secondary task"
+      description: "Deletes a secondary task. Task must be archived first before deletion."
+      produces:
+        - "application/json"
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the secondary task to delete"
+      responses:
+        200:
+          description: "Secondary task deleted successfully"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              message:
+                type: string
+                example: "Secondary task deleted successfully"
+        401:
+          description: "Unauthorized. Invalid or missing access token."
+          schema:
+            $ref: "#/definitions/GanttError"
+        403:
+          description: "Forbidden. User does not have FSM access."
+          schema:
+            $ref: "#/definitions/GanttError"
+        404:
+          description: "Secondary task not found"
+          schema:
+            $ref: "#/definitions/GanttError"
+        409:
+          description: "Conflict. Secondary task must be archived before deletion."
+          schema:
+            $ref: "#/definitions/GanttError"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/GanttError"
+      security:
+        - gantt_token: []
+
+  /api/gantt/check-overlap:
+    post:
+      tags:
+        - "Gantt"
+      summary: "Check time overlap"
+      description: "Checks for time overlaps between tasks for a specific employee and time range. Used for validation before creating or updating tasks."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: body
+          name: body
+          description: "Overlap check data"
+          required: true
+          schema:
+            $ref: "#/definitions/GanttOverlapCheck"
+      responses:
+        200:
+          description: "Overlap check completed"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              data:
+                $ref: "#/definitions/GanttOverlapDetails"
+        400:
+          description: "Bad request. Missing required fields or invalid data."
+          schema:
+            $ref: "#/definitions/GanttError"
+        401:
+          description: "Unauthorized. Invalid or missing access token."
+          schema:
+            $ref: "#/definitions/GanttError"
+        403:
+          description: "Forbidden. User does not have FSM access."
+          schema:
+            $ref: "#/definitions/GanttError"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/GanttError"
+      security:
+        - gantt_token: []
+
+  /api/gantt/tasks/{task_id}/archive:
+    post:
+      tags:
+        - "Gantt"
+      summary: "Archive project task"
+      description: "Archives a project task by setting active=False. Archived tasks can be restored later."
+      produces:
+        - "application/json"
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the task to archive"
+      responses:
+        200:
+          description: "Task archived successfully"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              data:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 123
+                  active:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Task archived successfully"
+        401:
+          description: "Unauthorized. Invalid or missing access token."
+          schema:
+            $ref: "#/definitions/GanttError"
+        403:
+          description: "Forbidden. User does not have FSM access."
+          schema:
+            $ref: "#/definitions/GanttError"
+        404:
+          description: "Task not found"
+          schema:
+            $ref: "#/definitions/GanttError"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/GanttError"
+      security:
+        - gantt_token: []
+
+  /api/gantt/secondary-tasks/{task_id}/archive:
+    post:
+      tags:
+        - "Gantt"
+      summary: "Archive secondary task"
+      description: "Archives a secondary task by setting active=False. Archived tasks can be restored later."
+      produces:
+        - "application/json"
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the secondary task to archive"
+      responses:
+        200:
+          description: "Secondary task archived successfully"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              data:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 456
+                  active:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Secondary task archived successfully"
+        401:
+          description: "Unauthorized. Invalid or missing access token."
+          schema:
+            $ref: "#/definitions/GanttError"
+        403:
+          description: "Forbidden. User does not have FSM access."
+          schema:
+            $ref: "#/definitions/GanttError"
+        404:
+          description: "Secondary task not found"
+          schema:
+            $ref: "#/definitions/GanttError"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/GanttError"
+      security:
+        - gantt_token: []
+
+  /api/gantt/tasks/{task_id}/unarchive:
+    post:
+      tags:
+        - "Gantt"
+      summary: "Restore project task"
+      description: "Restores (unarchives) a project task by setting active=True."
+      produces:
+        - "application/json"
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the task to restore"
+      responses:
+        200:
+          description: "Task restored successfully"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              data:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 123
+                  active:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Task restored successfully"
+        401:
+          description: "Unauthorized. Invalid or missing access token."
+          schema:
+            $ref: "#/definitions/GanttError"
+        403:
+          description: "Forbidden. User does not have FSM access."
+          schema:
+            $ref: "#/definitions/GanttError"
+        404:
+          description: "Task not found"
+          schema:
+            $ref: "#/definitions/GanttError"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/GanttError"
+      security:
+        - gantt_token: []
+
+  /api/gantt/secondary-tasks/{task_id}/unarchive:
+    post:
+      tags:
+        - "Gantt"
+      summary: "Restore secondary task"
+      description: "Restores (unarchives) a secondary task by setting active=True."
+      produces:
+        - "application/json"
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the secondary task to restore"
+      responses:
+        200:
+          description: "Secondary task restored successfully"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              data:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 456
+                  active:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Secondary task restored successfully"
+        401:
+          description: "Unauthorized. Invalid or missing access token."
+          schema:
+            $ref: "#/definitions/GanttError"
+        403:
+          description: "Forbidden. User does not have FSM access."
+          schema:
+            $ref: "#/definitions/GanttError"
+        404:
+          description: "Secondary task not found"
+          schema:
+            $ref: "#/definitions/GanttError"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/GanttError"
+      security:
+        - gantt_token: []
+
 securityDefinitions:
   api_key:
     type: "apiKey"
     name: "api_key"
     in: "header"
+  gantt_token:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+    description: "Bearer token for Gantt API authentication. Format: 'Bearer <token>'"
 
 definitions:
   TaskSummary:
@@ -1943,17 +2729,32 @@ definitions:
         type: string
         format: date-time
         example: "2025-01-20 09:00:00"
-        description: "Start date and time of the task. Can be null if not scheduled."
+        description: "Start date and time for estimate work. Can be null if not scheduled."
       date_deadline:
         type: string
         format: date-time
         example: "2025-01-20 11:00:00"
-        description: "End date and time of the task. Can be null if not scheduled."
+        description: "End date and time for estimate work. Can be null if not scheduled."
       duration_hours:
         type: number
         format: float
         example: 2.0
-        description: "Duration of the task in hours. Calculated from planned_date_begin and date_deadline."
+        description: "Duration of the estimate work in hours. Calculated from planned_date_begin and date_deadline."
+      tech_date_begin:
+        type: string
+        format: date-time
+        example: "2025-01-20 13:00:00"
+        description: "Start date and time for tech job work. Can be null if not scheduled."
+      tech_date_deadline:
+        type: string
+        format: date-time
+        example: "2025-01-20 15:00:00"
+        description: "End date and time for tech job work. Can be null if not scheduled."
+      tech_duration_hours:
+        type: number
+        format: float
+        example: 2.0
+        description: "Duration of the tech job work in hours. Calculated from tech_date_begin and tech_date_deadline."
       status:
         type: string
         example: "In Progress"
@@ -2106,6 +2907,16 @@ definitions:
       quotation_status:
         type: string
         example: "pending"
+      tech_date_begin:
+        type: string
+        format: date-time
+        example: "2024-07-15 13:00:00"
+        description: "Start date and time for tech job work. Can be null if not scheduled."
+      tech_date_deadline:
+        type: string
+        format: date-time
+        example: "2024-07-15 15:00:00"
+        description: "End date and time for tech job work. Can be null if not scheduled."
       create_date:
         type: string
         format: date-time
@@ -2950,3 +3761,401 @@ definitions:
         type: string
         example: "partial"
         description: "Payment state (not_paid, partial, paid, overpaid, etc.)"
+
+  GanttError:
+    type: object
+    properties:
+      status:
+        type: string
+        example: "error"
+      error:
+        type: object
+        properties:
+          code:
+            type: string
+            example: "UNAUTHORIZED"
+          message:
+            type: string
+            example: "Invalid or missing access token"
+          details:
+            type: object
+            description: "Additional error details if available"
+
+  GanttEmployee:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 123
+      name:
+        type: string
+        example: "John Smith"
+      icon:
+        type: string
+        nullable: true
+        example: "/web/image/hr.employee/123/image_1920"
+        description: "URL to employee image or null if no image"
+      company:
+        type: string
+        nullable: true
+        example: "ARGO Company"
+        description: "Company name or null if no company"
+      company_id:
+        type: integer
+        nullable: true
+        example: 1
+        description: "Company ID or null if no company"
+      color:
+        type: string
+        example: "#3498db"
+        description: "RGB color for Gantt chart display"
+      sequence:
+        type: integer
+        example: 10
+        description: "Display order sequence"
+
+  GanttProjectTask:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 456
+      name:
+        type: string
+        example: "Window Installation"
+      employee_id:
+        type: integer
+        nullable: true
+        example: 123
+        description: "Primary employee assigned to task based on schedule type"
+      partner_id:
+        type: integer
+        nullable: true
+        example: 789
+        description: "Customer ID"
+      partner_name:
+        type: string
+        nullable: true
+        example: "John Doe"
+        description: "Customer name"
+      address:
+        type: string
+        example: "123 Main St, City, State 12345"
+        description: "Customer address"
+      start_datetime:
+        type: string
+        format: date-time
+        nullable: true
+        example: "2025-01-20T09:00:00"
+        description: "Estimate schedule start datetime"
+      end_datetime:
+        type: string
+        format: date-time
+        nullable: true
+        example: "2025-01-20T11:00:00"
+        description: "Estimate schedule end datetime"
+      tech_start_datetime:
+        type: string
+        format: date-time
+        nullable: true
+        example: "2025-01-22T13:00:00"
+        description: "Tech job schedule start datetime"
+      tech_end_datetime:
+        type: string
+        format: date-time
+        nullable: true
+        example: "2025-01-22T15:00:00"
+        description: "Tech job schedule end datetime"
+      stage_id:
+        type: integer
+        nullable: true
+        example: 1
+        description: "Task stage ID"
+      stage_name:
+        type: string
+        nullable: true
+        example: "New"
+        description: "Task stage name"
+      type:
+        type: string
+        example: "estimate"
+        enum: ["estimate", "tech_job"]
+        description: "Task type based on available schedule dates"
+      active:
+        type: boolean
+        example: true
+        description: "Whether task is active or archived"
+
+  GanttSecondaryTask:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 789
+      employee_id:
+        type: integer
+        example: 123
+        description: "Employee assigned to secondary task"
+      start_datetime:
+        type: string
+        format: date-time
+        example: "2025-01-20T10:00:00"
+        description: "Secondary task start datetime"
+      end_datetime:
+        type: string
+        format: date-time
+        example: "2025-01-20T12:00:00"
+        description: "Secondary task end datetime"
+      address:
+        type: string
+        example: "456 Oak Ave, City, State 12345"
+        description: "Secondary task address"
+      description:
+        type: string
+        example: "Training session"
+        description: "Secondary task description"
+      active:
+        type: boolean
+        example: true
+        description: "Whether secondary task is active or archived"
+
+  GanttTaskCreate:
+    type: object
+    required:
+      - employee_id
+      - start_datetime
+      - end_datetime
+    properties:
+      employee_id:
+        type: integer
+        example: 123
+        description: "Employee ID to assign to task"
+      start_datetime:
+        type: string
+        format: date-time
+        example: "2025-01-20T09:00:00"
+        description: "Task start datetime (ISO format)"
+      end_datetime:
+        type: string
+        format: date-time
+        example: "2025-01-20T11:00:00"
+        description: "Task end datetime (ISO format)"
+      type:
+        type: string
+        example: "estimate"
+        enum: ["estimate", "tech_job"]
+        default: "estimate"
+        description: "Task type - determines schedule type and employee role"
+      partner_id:
+        type: integer
+        example: 789
+        description: "Customer ID to assign to task"
+      project_id:
+        type: integer
+        example: 456
+        description: "Project ID to assign to task"
+
+  GanttTaskUpdate:
+    type: object
+    properties:
+      employee_id:
+        type: integer
+        example: 123
+        description: "New employee ID to assign to task"
+      start_datetime:
+        type: string
+        format: date-time
+        example: "2025-01-20T10:00:00"
+        description: "New task start datetime (ISO format)"
+      end_datetime:
+        type: string
+        format: date-time
+        example: "2025-01-20T12:00:00"
+        description: "New task end datetime (ISO format)"
+
+  GanttCustomer:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 789
+      name:
+        type: string
+        example: "John Doe"
+      street:
+        type: string
+        example: "123 Main St"
+      city:
+        type: string
+        example: "New York"
+      phone:
+        type: string
+        example: "+1-555-0123"
+      is_suggested:
+        type: boolean
+        example: false
+        description: "Whether this customer was suggested by ID parameter"
+
+  GanttSecondaryTaskCreate:
+    type: object
+    required:
+      - employee_id
+      - start_datetime
+      - end_datetime
+      - address
+      - description
+    properties:
+      employee_id:
+        type: integer
+        example: 123
+        description: "Employee ID to assign to secondary task"
+      start_datetime:
+        type: string
+        format: date-time
+        example: "2025-01-20T10:00:00"
+        description: "Secondary task start datetime (ISO format)"
+      end_datetime:
+        type: string
+        format: date-time
+        example: "2025-01-20T12:00:00"
+        description: "Secondary task end datetime (ISO format)"
+      address:
+        type: string
+        example: "456 Oak Ave, City, State 12345"
+        description: "Secondary task address"
+      description:
+        type: string
+        example: "Training session"
+        description: "Secondary task description"
+
+  GanttSecondaryTaskUpdate:
+    type: object
+    properties:
+      employee_id:
+        type: integer
+        example: 123
+        description: "New employee ID to assign to secondary task"
+      start_datetime:
+        type: string
+        format: date-time
+        example: "2025-01-20T10:00:00"
+        description: "New secondary task start datetime (ISO format)"
+      end_datetime:
+        type: string
+        format: date-time
+        example: "2025-01-20T12:00:00"
+        description: "New secondary task end datetime (ISO format)"
+      address:
+        type: string
+        example: "456 Oak Ave, City, State 12345"
+        description: "New secondary task address"
+      description:
+        type: string
+        example: "Updated training session"
+        description: "New secondary task description"
+
+  GanttOverlapCheck:
+    type: object
+    required:
+      - employee_id
+      - start_datetime
+      - end_datetime
+    properties:
+      employee_id:
+        type: integer
+        example: 123
+        description: "Employee ID to check for overlaps"
+      start_datetime:
+        type: string
+        format: date-time
+        example: "2025-01-20T09:00:00"
+        description: "Start datetime for overlap check (ISO format)"
+      end_datetime:
+        type: string
+        format: date-time
+        example: "2025-01-20T11:00:00"
+        description: "End datetime for overlap check (ISO format)"
+      exclude_task_id:
+        type: integer
+        example: 456
+        description: "Task ID to exclude from overlap check (for updates)"
+      should_use_tech_schedule:
+        type: boolean
+        example: false
+        description: "DEPRECATED - ignored for backward compatibility"
+
+  GanttOverlapDetails:
+    type: object
+    properties:
+      has_overlaps:
+        type: boolean
+        example: true
+        description: "Whether any overlaps were found"
+      overlapping_tasks:
+        type: array
+        items:
+          type: object
+          properties:
+            task_id:
+              type: integer
+              example: 456
+            task_name:
+              type: string
+              example: "Window Installation"
+            employee_id:
+              type: integer
+              example: 123
+            employee_name:
+              type: string
+              example: "John Smith"
+            start_datetime:
+              type: string
+              format: date-time
+              example: "2025-01-20T08:00:00"
+            end_datetime:
+              type: string
+              format: date-time
+              example: "2025-01-20T10:00:00"
+            schedule_type:
+              type: string
+              example: "estimate"
+              enum: ["estimate", "tech_job"]
+        description: "List of overlapping project tasks"
+      overlapping_secondary_tasks:
+        type: array
+        items:
+          type: object
+          properties:
+            task_id:
+              type: integer
+              example: 789
+            employee_id:
+              type: integer
+              example: 123
+            employee_name:
+              type: string
+              example: "John Smith"
+            start_datetime:
+              type: string
+              format: date-time
+              example: "2025-01-20T09:30:00"
+            end_datetime:
+              type: string
+              format: date-time
+              example: "2025-01-20T11:30:00"
+            description:
+              type: string
+              example: "Training session"
+        description: "List of overlapping secondary tasks"
+      employees_checked:
+        type: array
+        items:
+          type: object
+          properties:
+            employee_id:
+              type: integer
+              example: 123
+            employee_name:
+              type: string
+              example: "John Smith"
+        description: "List of employees that were checked for overlaps"
