@@ -718,7 +718,62 @@ paths:
       security:
         - api_key: [ ]
 
-  /api/v1/attachment/<int:attachment_id>:
+  /api/v1/task/note/{note_id}:
+    delete:
+      tags:
+        - "Notes"
+      summary: "Delete a note"
+      description: "Deletes a specific note by ID. Only the note owner can delete their notes."
+      produces:
+        - "application/json"
+      parameters:
+        - name: note_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the note to delete"
+      responses:
+        204:
+          description: "Note successfully deleted"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. You are not the owner of this note."
+        404:
+          description: "Note not found"
+      security:
+        - api_key: [ ]
+    get:
+      tags:
+        - "Notes"
+      summary: "Get a specific note by ID"
+      description: "Returns a specific note by ID. Employee must be assigned to the task."
+      produces:
+        - "application/json"
+      parameters:
+        - name: note_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the note to retrieve"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/Note"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. You are not assigned to this task."
+        404:
+          description: "Note not found"
+      security:
+        - api_key: [ ]
+
+  /api/v1/attachment/{attachment_id}:
     get:
       tags:
         - "Attachments"
@@ -744,6 +799,30 @@ paths:
                 $ref: "#/definitions/AttachmentBase64"
         401:
           description: "Unauthorized. Token is invalid or expired."
+        404:
+          description: "Attachment not found"
+      security:
+        - api_key: [ ]
+    delete:
+      tags:
+        - "Attachments"
+      summary: "Delete an attachment"
+      description: "Deletes a specific attachment by ID. Only attachments from project.task.note can be deleted and only by the note owner."
+      produces:
+        - "application/json"
+      parameters:
+        - name: attachment_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the attachment to delete"
+      responses:
+        204:
+          description: "Attachment successfully deleted"
+        401:
+          description: "Unauthorized. Token is invalid or expired."
+        403:
+          description: "Forbidden. Only note attachments can be deleted or you are not the owner of the note."
         404:
           description: "Attachment not found"
       security:
