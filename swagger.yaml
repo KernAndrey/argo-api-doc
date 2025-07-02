@@ -2846,6 +2846,50 @@ definitions:
         type: string
         format: date-time
         example: "2025-01-20 08:45:00"
+      estimators:
+        type: array
+        description: "List of estimators assigned to the task"
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 123
+              description: "Employee ID"
+            name:
+              type: string
+              example: "John Smith"
+              description: "Employee name"
+            mobile_phone:
+              type: string
+              example: "+1234567890"
+              description: "Employee mobile phone number"
+            color:
+              type: string
+              example: "#ff5733"
+              description: "Employee color code for visual identification"
+      technicians:
+        type: array
+        description: "List of technicians assigned to the task"
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 456
+              description: "Employee ID"
+            name:
+              type: string
+              example: "Jane Doe"
+              description: "Employee name"
+            mobile_phone:
+              type: string
+              example: "+0987654321"
+              description: "Employee mobile phone number"
+            color:
+              type: string
+              example: "#33ff57"
+              description: "Employee color code for visual identification"
 
   TaskShort:
     type: object
