@@ -47,7 +47,7 @@ paths:
       tags:
         - "Tasks"
       summary: "Returns filtered list of assigned tasks with date filtering, timezone support and search capabilities"
-      description: "Returns tasks assigned to the authenticated employee (estimator or technician) with optional date filtering (with timezone support) and customer search. Date filtering matches tasks with either estimate dates (planned_date_begin/date_deadline) OR tech job dates (tech_date_begin/tech_date_deadline) in the specified range. Returns tasks for today by default if no parameters provided."
+      description: "Returns tasks assigned to the authenticated employee (estimator or technician) with optional date filtering (with timezone support) and customer search. Date filtering matches tasks with either estimate dates (planned_date_begin/date_deadline) OR tech job dates (tech_date_begin/tech_date_deadline) in the specified range. Supports single day filtering (with 'date' only) or date range filtering (with 'date' and 'date_to'). Returns tasks for today by default if no parameters provided."
       consumes:
         - "application/json"
       produces:
@@ -59,8 +59,16 @@ paths:
           type: string
           format: date
           pattern: '^\d{4}-\d{2}-\d{2}$'
-          description: "Filter tasks by date in YYYY-MM-DD format. Matches tasks with either estimate dates OR tech job dates in the specified range. Defaults to today's date if not provided and no search query is given. Date is interpreted in the specified timezone or UTC if no timezone provided."
+          description: "Filter tasks by start date in YYYY-MM-DD format. Matches tasks with either estimate dates OR tech job dates in the specified range. If 'date_to' is also provided, this serves as the start date for a date range filter. Defaults to today's date if not provided and no search query is given. Date is interpreted in the specified timezone or UTC if no timezone provided."
           example: "2025-01-20"
+        - name: date_to
+          in: query
+          required: false
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          description: "Filter tasks by end date in YYYY-MM-DD format. Optional parameter that works with 'date' to create a date range filter. If provided, filters tasks from 'date' to 'date_to' (inclusive). Must not be earlier than 'date'. Date is interpreted in the specified timezone or UTC if no timezone provided."
+          example: "2025-01-25"
         - name: q
           in: query
           required: false
@@ -3062,8 +3070,53 @@ definitions:
         type: string
         example: "Mister"
       address:
-        type: string
-        example: "4557 De Silva St, 94538 Fremont, California, United States"
+        type: object
+        description: "Customer address information with both complete formatted address and individual components"
+        properties:
+          complete:
+            type: string
+            description: "Complete formatted address string"
+            example: "4557 De Silva St, 94538 Fremont, California, United States"
+          street:
+            type: string
+            description: "Primary street address"
+            example: "4557 De Silva St"
+          street2:
+            type: string
+            description: "Secondary street address (apartment, suite, etc.)"
+            example: "Apt 123"
+          city:
+            type: string
+            description: "City name"
+            example: "Fremont"
+          zip:
+            type: string
+            description: "Postal/ZIP code"
+            example: "94538"
+          state:
+            type: object
+            description: "State/province information"
+            properties:
+              id:
+                type: integer
+                description: "State ID"
+                example: 5
+              name:
+                type: string
+                description: "State name"
+                example: "California"
+          country:
+            type: object
+            description: "Country information"
+            properties:
+              id:
+                type: integer
+                description: "Country ID"
+                example: 233
+              name:
+                type: string
+                description: "Country name"
+                example: "United States"
       phone:
         type: string
         example: null
