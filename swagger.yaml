@@ -3038,6 +3038,16 @@ definitions:
       quotation_status:
         type: string
         example: "pending"
+      estimator_date_begin:
+        type: string
+        format: date-time
+        example: "2024-07-15 09:00:00"
+        description: "Planned start date and time for the estimator work. Can be null if not scheduled."
+      estimator_date_deadline:
+        type: string
+        format: date-time
+        example: "2024-07-15 17:00:00"
+        description: "Planned deadline date and time for the estimator work. Can be null if not set."
       tech_date_begin:
         type: string
         format: date-time
