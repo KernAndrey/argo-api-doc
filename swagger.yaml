@@ -37,6 +37,8 @@ tags:
     description: "Endpoints for sending emails"
   - name: "Gantt"
     description: "Endpoints for Gantt chart functionality"
+  - name: "Calculators"
+    description: "Endpoints for calculator resources"
 schemes:
   - "https"
   - "http"
@@ -342,6 +344,27 @@ paths:
               description: "Service not found"
         security:
             - api_key: [ ]
+
+  /api/v1/calculators/fwr.xml:
+    get:
+      tags:
+        - "Calculators"
+      summary: "Serve the static FWR.xml calculator file"
+      description: "Returns the FWR.xml calculator file for mobile app usage"
+      produces:
+        - "application/xml"
+      responses:
+        200:
+          description: "XML file successfully returned"
+          schema:
+            type: string
+            format: binary
+        404:
+          description: "FWR.xml file not found"
+        500:
+          description: "Internal server error"
+      security:
+        - api_key: [ ]
 
   /api/v1/customer/:
     post:
